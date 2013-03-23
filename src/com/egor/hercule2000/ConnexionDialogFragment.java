@@ -6,9 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.widget.Toast;
 
 public class ConnexionDialogFragment extends DialogFragment {
+	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		// Instanciation de Builder pour la construction du dialogue
@@ -19,7 +19,8 @@ public class ConnexionDialogFragment extends DialogFragment {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								// Click sur le boutton OK
-								Toast.makeText(getActivity(), "Connexion en cours", Toast.LENGTH_SHORT).show();
+								//((FragmentAlertDialog)getActivity()).doPositiveClick();
+								//CommandeManuelle.this.doPositiveClick();
 							}
 						})
 				.setNegativeButton(android.R.string.cancel,
