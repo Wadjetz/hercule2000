@@ -2,11 +2,15 @@ package com.egor.hercule2000;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class CommandeManuelle extends Activity {
+
+	protected static final int SEEK_BAR_CHANGMENT = 0001;
+	protected static final int BUTTON_BASE_PLUS = 0002;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -14,20 +18,29 @@ public class CommandeManuelle extends Activity {
 		setContentView(R.layout.activity_commande_manuelle);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		
+
 		ConnexionDialogFragment connexionDialog = new ConnexionDialogFragment();
 		connexionDialog.show(getFragmentManager(), null);
-		
+
 	}
 
-	
-	
-	
-	
-	
-	
+	// Le Handler (Thread) charger de modifier le IHM
+	private Handler handler = new Handler() {
+		@Override
+		public void handleMessage(android.os.Message msg) {
+			switch (msg.what) {
+			case SEEK_BAR_CHANGMENT:
+
+				break;
+			case BUTTON_BASE_PLUS:
+
+				break;
+			}
+		};
+	};
+
 	/* Menu et Navigation */
-	
+
 	/**
 	 * Set up the {@link android.app.ActionBar}.
 	 */
