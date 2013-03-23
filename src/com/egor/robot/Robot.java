@@ -2,12 +2,21 @@ package com.egor.robot;
 
 
 public class Robot {
+	
+	public static final int POSITIVE = 1;
+	public static final int NEGATIVE = -1;
+	
 	public Axe base = new Axe(Articulation.BASE);
 	public Axe epaule = new Axe(Articulation.EPAULE);
 	public Axe coude = new Axe(Articulation.COUDE);
 	public Axe tangage = new Axe(Articulation.TANGAGE);
 	public Axe roulis = new Axe(Articulation.ROULIS);
 	public Pince pince = new Pince();
+	
+	public String calculeRotation(String art, int sense) {
+		return art;
+	}
+	
 	
 	public String temporisationt(int delais) {
 		String requete = new String();

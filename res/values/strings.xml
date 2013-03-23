@@ -22,5 +22,7 @@
     <string name="moin">-</string>
     <string name="connexion_reseau">Connexion Reseau</string>
     <string name="title_activity_commande_manuelle">CommandeManuelle</string>
+    <string name="serrer">Serrer</string>
+    <string name="relacher">Relâcher</string>
 
 </resources>

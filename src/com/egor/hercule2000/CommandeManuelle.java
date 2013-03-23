@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import com.egor.robot.Robot;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -41,27 +42,28 @@ public class CommandeManuelle extends Activity {
 	private String ip;
 	// Numéro de port du PC Contrôleur
 	private int port;
-	//
+	// Dialog
 	private DialogFragment connexionDialog = new MyDialog();
-
+	// Robot
+	Robot robot = new Robot();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_commande_manuelle);
+		setContentView(R.layout.commande_manuelle);
 		// Show the Up button in the action bar.
 		setupActionBar();
 
-		// Gestion du click sur le bouton test
-		findViewById(R.id.test).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// On envoie un message au Hundler
-				handler.sendEmptyMessage(AUTRES);
-			}
-		});
-
-		// On affiche le dialog de connexion
 		showDialog(MyDialog.DIALOG_CONNEXION_SOCKET);
+	}
+
+	public void rotationNegative(View view) {
+		emission(robot.calculeRotation(view.getTag().toString(), Robot.NEGATIVE));
+		Log.d("Egor", "rotationNegative" + view.getTag());
+	}
+
+	public void rotationPositive(View view) {
+		emission(robot.calculeRotation(view.getTag().toString(), Robot.POSITIVE));
+		Log.d("Egor", "rotationPositive" + view.getTag());
 	}
 
 	@Override
@@ -124,8 +126,7 @@ public class CommandeManuelle extends Activity {
 					} else {
 						showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 					}
-				}
-				else {
+				} else {
 					showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				}
 				break;
