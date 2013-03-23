@@ -35,12 +35,14 @@ public class CommandeManuelle extends Activity {
 	// Client socket pour communiquer en réseaux
 	private Socket socket = null;
 	private PrintWriter emetteur = null;
-	//private BufferedReader recepteur = null;
+	// private BufferedReader recepteur = null;
 
 	// Adresse IP du PC Contrôleur
 	private String ip;
 	// Numéro de port du PC Contrôleur
 	private int port;
+	//
+	private DialogFragment connexionDialog = new MyDialog();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,7 @@ public class CommandeManuelle extends Activity {
 		});
 
 		// On affiche le dialog de connexion
-		showDialog();
+		showDialog(MyDialog.DIALOG_CONNEXION_SOCKET);
 	}
 
 	@Override
@@ -95,14 +97,16 @@ public class CommandeManuelle extends Activity {
 							Log.d("Egor", "Socket Connecter");
 
 							if (socket.isConnected()) {
-								emetteur = new PrintWriter(
-										socket.getOutputStream(), true);
+								emetteur = new PrintWriter(socket
+										.getOutputStream(), true);
 								emission("Salut");
 							}
 						} catch (UnknownHostException e) {
+							showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 							Log.d("Egor", "Socket Erreur : " + e.getMessage());
 							e.printStackTrace();
 						} catch (IOException e) {
+							showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 							Log.d("Egor", "Socket Erreur : " + e.getMessage());
 							e.printStackTrace();
 						}
@@ -114,26 +118,30 @@ public class CommandeManuelle extends Activity {
 
 				break;
 			case AUTRES:
-				if (socket.isConnected()) {
-					emission("Bonjour");
+				if (socket != null) {
+					if (socket.isConnected()) {
+						emission("Bonjour");
+					} else {
+						showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+					}
+				}
+				else {
+					showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				}
 				break;
 			}
 		};
 	};
 
-	private void showDialog() {
-		DialogFragment connexionDialog = new ConnexionDialog();
-		connexionDialog.show(getFragmentManager(), "dialog");
-	}
-
 	public void doPositiveClick() {
 		handler.sendEmptyMessage(CONNEXION_SOCKET);
 		Log.i("Egor", "Positive click!");
 	}
+
 	public void emission(String msg) {
 		emetteur.println(msg);
 	}
+
 	public void doNegativeClick() {
 		startActivity(new Intent(this, MainActivity.class));
 		Log.i("Egor", "Negative click!");
@@ -174,42 +182,62 @@ public class CommandeManuelle extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	class ConnexionDialog extends DialogFragment {
+	class MyDialog extends DialogFragment {
+		protected static final String DIALOG_CONNEXION_SOCKET = "DCS";
+		protected static final String DIALOG_CONNEXION_SOCKET_ERREUR = "DCSE";
 
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			// Instanciation de Builder pour la construction du dialogue
-			LayoutInflater factory = LayoutInflater.from(CommandeManuelle.this);
-			final View alertDialogView = factory.inflate(
-					R.layout.connexion_dialog, null);
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder.setView(alertDialogView);
-			builder.setMessage(R.string.connexion_reseau);
-			builder.setPositiveButton(android.R.string.ok,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							// Click sur le boutton OK
+			LayoutInflater factory = LayoutInflater.from(CommandeManuelle.this);
 
-							EditText ip_dialog = (EditText) alertDialogView
-									.findViewById(R.id.edt_ip_connexion_dialog);
-							EditText port_dialog = (EditText) alertDialogView
-									.findViewById(R.id.edt_port_connexion_dialog);
-							ip = ip_dialog.getText().toString();
-							port = Integer.parseInt(port_dialog.getText()
-									.toString());
-							CommandeManuelle.this.doPositiveClick();
-						}
-					});
-			builder.setNegativeButton(android.R.string.cancel,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							// User cancelled the dialog
-							CommandeManuelle.this.doNegativeClick();
-						}
-					});
+			if (getTag().compareTo(DIALOG_CONNEXION_SOCKET) == 0) {
+				final View alertDialogView = factory.inflate(
+						R.layout.connexion_dialog, null);
+				builder.setView(alertDialogView);
+				builder.setTitle(R.string.connexion_reseau);
+				builder.setPositiveButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// Click sur le boutton OK
+
+								EditText ip_dialog = (EditText) alertDialogView
+										.findViewById(R.id.edt_ip_connexion_dialog);
+								EditText port_dialog = (EditText) alertDialogView
+										.findViewById(R.id.edt_port_connexion_dialog);
+								ip = ip_dialog.getText().toString();
+								port = Integer.parseInt(port_dialog.getText()
+										.toString());
+								CommandeManuelle.this.doPositiveClick();
+							}
+						});
+				builder.setNegativeButton(android.R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// User cancelled the dialog
+								CommandeManuelle.this.doNegativeClick();
+							}
+						});
+			}
+
+			if (getTag().compareTo(DIALOG_CONNEXION_SOCKET_ERREUR) == 0) {
+				builder.setTitle("Erreur de Connexion");
+				builder.setPositiveButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// Click sur le boutton OK
+								CommandeManuelle.this.doNegativeClick();
+							}
+						});
+			}
 
 			// Create the AlertDialog object and return it
 			return builder.create();
 		}
 	}
+
+	public void showDialog(String tag) {
+		connexionDialog.show(getFragmentManager(), tag);
+	}
+
 }
