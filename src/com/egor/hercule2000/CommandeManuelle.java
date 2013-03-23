@@ -1,5 +1,10 @@
 package com.egor.hercule2000;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,13 +27,20 @@ import android.widget.Toast;
 @SuppressLint({ "HandlerLeak", "ValidFragment" })
 public class CommandeManuelle extends Activity {
 
+	// Des constantes pour identifier les actions du Hundler
 	protected static final int CONNEXION_SOCKET = 0001;
 	protected static final int SEEK_BAR_CHANGMENT = 0002;
 	protected static final int AUTRES = 0003;
 
-	private Client client;
+	// Client socket pour communiquer en réseaux
+	private Socket socket = null;
+	private PrintWriter emetteur = null;
+	//private BufferedReader recepteur = null;
+
+	// Adresse IP du PC Contrôleur
 	private String ip;
-	private String port;
+	// Numéro de port du PC Contrôleur
+	private int port;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,51 +48,79 @@ public class CommandeManuelle extends Activity {
 		setContentView(R.layout.activity_commande_manuelle);
 		// Show the Up button in the action bar.
 		setupActionBar();
+
+		// Gestion du click sur le bouton test
 		findViewById(R.id.test).setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
+				// On envoie un message au Hundler
 				handler.sendEmptyMessage(AUTRES);
 			}
 		});
+
+		// On affiche le dialog de connexion
 		showDialog();
 	}
 
 	@Override
 	protected void onDestroy() {
-		client.close();
+
+		// On ferme le Client socket à la fermeture de l'application
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		super.onDestroy();
 	}
-	
+
 	// Le Handler (Thread) charger de modifier le IHM
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case CONNEXION_SOCKET:
-				String s = "Connexion en cours" + ip + ":" + port;
-				Toast.makeText(CommandeManuelle.this, s, Toast.LENGTH_SHORT)
-						.show();
-				onCreateClient();
+				Toast.makeText(CommandeManuelle.this,
+						"Connexion en cours" + ip + ":" + port,
+						Toast.LENGTH_SHORT).show();
+
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+						try {
+							Log.d("Egor", "Socket");
+							socket = new Socket(ip, port);
+							Log.d("Egor", "Socket Connecter");
+
+							if (socket.isConnected()) {
+								emetteur = new PrintWriter(
+										socket.getOutputStream(), true);
+								emission("Salut");
+							}
+						} catch (UnknownHostException e) {
+							Log.d("Egor", "Socket Erreur : " + e.getMessage());
+							e.printStackTrace();
+						} catch (IOException e) {
+							Log.d("Egor", "Socket Erreur : " + e.getMessage());
+							e.printStackTrace();
+						}
+					}
+				});
+				t.start();
 				break;
 			case SEEK_BAR_CHANGMENT:
 
 				break;
 			case AUTRES:
-				if (client.isActive()) {
-					client.emission("Salut");
-				}
-				else {
-					doNegativeClick();
+				if (socket.isConnected()) {
+					emission("Bonjour");
 				}
 				break;
 			}
 		};
 	};
-
-	public void connexionHandlerMessage(String ip, int port) {
-		this.handler.sendEmptyMessage(CONNEXION_SOCKET);
-	}
 
 	private void showDialog() {
 		DialogFragment connexionDialog = new ConnexionDialog();
@@ -89,33 +129,14 @@ public class CommandeManuelle extends Activity {
 
 	public void doPositiveClick() {
 		handler.sendEmptyMessage(CONNEXION_SOCKET);
-		Log.i("FragmentAlertDialog", "Positive click!");
+		Log.i("Egor", "Positive click!");
 	}
-
+	public void emission(String msg) {
+		emetteur.println(msg);
+	}
 	public void doNegativeClick() {
 		startActivity(new Intent(this, MainActivity.class));
-		Log.i("FragmentAlertDialog", "Negative click!");
-	}
-
-	public void onCreateClient() {
-		Thread t = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				client = new Client(ip, port);
-			}
-		});
-		t.start();
-	}
-
-	public void test() {
-		if (client.isActive()) {
-			Toast.makeText(CommandeManuelle.this, "Connexion Reseaux OK",
-					Toast.LENGTH_SHORT).show();
-		} else {
-			Toast.makeText(CommandeManuelle.this, "Erreur Connexion Reseaux",
-					Toast.LENGTH_SHORT).show();
-		}
+		Log.i("Egor", "Negative click!");
 	}
 
 	/* Menu et Navigation */
@@ -154,38 +175,39 @@ public class CommandeManuelle extends Activity {
 	}
 
 	class ConnexionDialog extends DialogFragment {
-		private View alertDialogView;
-		private LayoutInflater inflater;
+
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			// Instanciation de Builder pour la construction du dialogue
+			LayoutInflater factory = LayoutInflater.from(CommandeManuelle.this);
+			final View alertDialogView = factory.inflate(
+					R.layout.connexion_dialog, null);
 			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			inflater = getActivity().getLayoutInflater();
-			builder.setMessage(R.string.connexion_reseau)
-					.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// Click sur le boutton OK
-									alertDialogView = inflater.inflate(R.layout.connexion_dialog, null);
-									EditText ip_dialog = (EditText) alertDialogView
-											.findViewById(R.id.edt_ip_connexion_dialog);
-									EditText port_dialog = (EditText) alertDialogView
-											.findViewById(R.id.edt_port_connexion_dialog);
-									ip = ip_dialog.getText().toString();
-									port = port_dialog.getText().toString();
-									CommandeManuelle.this.doPositiveClick();
-								}
-							})
-					.setNegativeButton(android.R.string.cancel,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// User cancelled the dialog
-									CommandeManuelle.this.doNegativeClick();
-								}
-							});
-			builder.setView(inflater.inflate(R.layout.connexion_dialog, null));
+			builder.setView(alertDialogView);
+			builder.setMessage(R.string.connexion_reseau);
+			builder.setPositiveButton(android.R.string.ok,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							// Click sur le boutton OK
+
+							EditText ip_dialog = (EditText) alertDialogView
+									.findViewById(R.id.edt_ip_connexion_dialog);
+							EditText port_dialog = (EditText) alertDialogView
+									.findViewById(R.id.edt_port_connexion_dialog);
+							ip = ip_dialog.getText().toString();
+							port = Integer.parseInt(port_dialog.getText()
+									.toString());
+							CommandeManuelle.this.doPositiveClick();
+						}
+					});
+			builder.setNegativeButton(android.R.string.cancel,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							// User cancelled the dialog
+							CommandeManuelle.this.doNegativeClick();
+						}
+					});
+
 			// Create the AlertDialog object and return it
 			return builder.create();
 		}
