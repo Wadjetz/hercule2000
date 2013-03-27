@@ -21,6 +21,13 @@ public class MainActivity extends Activity {
 				startActivity(new Intent(MainActivity.this, CommandeManuelle.class));
 			}
 		});
+		
+		((Button)findViewById(R.id.commande_gyroscope)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, GyroscopeCommande.class));
+			}
+		});
 	}
 
 	@Override

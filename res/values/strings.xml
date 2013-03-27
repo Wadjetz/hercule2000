@@ -10,7 +10,8 @@
     <string name="port_default">9999</string>
     <string name="connexion">Connexion</string>
     <string name="envoyer">Envoyer</string>
-    <string name="commande_manuelle">Commande Manuelle</string>
+    <string name="commande_manuelle">Commande manuelle</string>
+    <string name="commande_gyroscope">Commande gyroscope</string>
     <string name="base">BASE</string>
     <string name="epaule">EPAULE</string>
     <string name="coude">COUDE</string>
@@ -24,5 +25,6 @@
     <string name="title_activity_commande_manuelle">CommandeManuelle</string>
     <string name="serrer">Serrer</string>
     <string name="relacher">Relâcher</string>
+    <string name="title_activity_gyroscope_commande">GyroscopeCommande</string>
 
 </resources>

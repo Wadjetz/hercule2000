@@ -22,4 +22,13 @@
         android:layout_below="@+id/description"
         android:text="@string/commande_manuelle" />
 
+    <Button
+        android:id="@+id/commande_gyroscope"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/commande_manuelle"
+        android:layout_below="@+id/commande_manuelle"
+        android:layout_marginTop="14dp"
+        android:text="@string/commande_gyroscope" />
+
 </RelativeLayout>

@@ -5,28 +5,28 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.egor.robot.Robot;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
-@SuppressLint({ "HandlerLeak", "ValidFragment" })
+import com.egor.robot.Robot;
+
+@SuppressLint("HandlerLeak")
 public class CommandeManuelle extends Activity {
+
+	/* ----------------------- ATTRIBUTS ------------------- */
 
 	// Des constantes pour identifier les actions du Hundler
 	protected static final int CONNEXION_SOCKET = 0001;
@@ -37,46 +37,75 @@ public class CommandeManuelle extends Activity {
 	private Socket socket = null;
 	private PrintWriter emetteur = null;
 	// private BufferedReader recepteur = null;
-
+	
+	private TextView txv_vitesse = null;
+	private SeekBar seekBar = null;
 	// Adresse IP du PC Contrôleur
 	private String ip;
 	// Numéro de port du PC Contrôleur
 	private int port;
+	private int vitesse = 30;
 	// Dialog
-	private DialogFragment connexionDialog = new MyDialog();
+	private DialogFragment connexionDialog = new MDialog();
 	// Robot
-	Robot robot = new Robot();
+	private Robot robot = new Robot();
+	
+	SeekBar.OnSeekBarChangeListener seekBarEvent = new OnSeekBarChangeListener() {
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+		}
+
+		@Override
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+
+			Thread t = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					handler.sendEmptyMessage(SEEK_BAR_CHANGMENT);
+				}
+			});
+			t.start();
+		}
+	};
+	
+	/* ----------------------- METHODES ---------------------- */
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.commande_manuelle);
 		// Show the Up button in the action bar.
 		setupActionBar();
-
-		showDialog(MyDialog.DIALOG_CONNEXION_SOCKET);
+		
+		seekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
+		txv_vitesse = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
+		seekBar.setOnSeekBarChangeListener(seekBarEvent);
+		seekBar.setProgress(30);
+		// On affiche le dialog de connexion
+		showDialog(MDialog.DIALOG_CONNEXION_SOCKET);
 	}
 
 	public void rotationNegative(View view) {
-		emission(robot.calculeRotation(view.getTag().toString(), Robot.NEGATIVE));
+		emission(robot
+				.calculeRotation(view.getTag().toString().substring(0, 1), Robot.NEGATIVE, 100, vitesse));
 		Log.d("Egor", "rotationNegative" + view.getTag());
 	}
 
 	public void rotationPositive(View view) {
-		emission(robot.calculeRotation(view.getTag().toString(), Robot.POSITIVE));
+		emission(robot
+				.calculeRotation(view.getTag().toString().substring(0, 1), Robot.POSITIVE, 50, vitesse));
 		Log.d("Egor", "rotationPositive" + view.getTag());
 	}
 
-	@Override
-	protected void onDestroy() {
-
-		// On ferme le Client socket à la fermeture de l'application
-		try {
-			socket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		super.onDestroy();
+	public void showDialog(String tag) {
+		connexionDialog.show(getFragmentManager(), tag);
 	}
 
 	// Le Handler (Thread) charger de modifier le IHM
@@ -99,16 +128,16 @@ public class CommandeManuelle extends Activity {
 							Log.d("Egor", "Socket Connecter");
 
 							if (socket.isConnected()) {
-								emetteur = new PrintWriter(socket
-										.getOutputStream(), true);
+								emetteur = new PrintWriter(
+										socket.getOutputStream(), true);
 								emission("Salut");
 							}
 						} catch (UnknownHostException e) {
-							showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+							showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 							Log.d("Egor", "Socket Erreur : " + e.getMessage());
 							e.printStackTrace();
 						} catch (IOException e) {
-							showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+							showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 							Log.d("Egor", "Socket Erreur : " + e.getMessage());
 							e.printStackTrace();
 						}
@@ -117,24 +146,27 @@ public class CommandeManuelle extends Activity {
 				t.start();
 				break;
 			case SEEK_BAR_CHANGMENT:
-
+				vitesse = seekBar.getProgress() + 1;
+				txv_vitesse.setText("Vitesse : " + vitesse);
 				break;
 			case AUTRES:
 				if (socket != null) {
 					if (socket.isConnected()) {
 						emission("Bonjour");
 					} else {
-						showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+						showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 					}
 				} else {
-					showDialog(MyDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+					showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				}
 				break;
 			}
 		};
 	};
 
-	public void doPositiveClick() {
+	public void doPositiveClick(String ip, int port) {
+		this.ip = ip;
+		this.port = port;
 		handler.sendEmptyMessage(CONNEXION_SOCKET);
 		Log.i("Egor", "Positive click!");
 	}
@@ -183,62 +215,18 @@ public class CommandeManuelle extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	class MyDialog extends DialogFragment {
-		protected static final String DIALOG_CONNEXION_SOCKET = "DCS";
-		protected static final String DIALOG_CONNEXION_SOCKET_ERREUR = "DCSE";
+	@Override
+	protected void onDestroy() {
 
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			LayoutInflater factory = LayoutInflater.from(CommandeManuelle.this);
-
-			if (getTag().compareTo(DIALOG_CONNEXION_SOCKET) == 0) {
-				final View alertDialogView = factory.inflate(
-						R.layout.connexion_dialog, null);
-				builder.setView(alertDialogView);
-				builder.setTitle(R.string.connexion_reseau);
-				builder.setPositiveButton(android.R.string.ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// Click sur le boutton OK
-
-								EditText ip_dialog = (EditText) alertDialogView
-										.findViewById(R.id.edt_ip_connexion_dialog);
-								EditText port_dialog = (EditText) alertDialogView
-										.findViewById(R.id.edt_port_connexion_dialog);
-								ip = ip_dialog.getText().toString();
-								port = Integer.parseInt(port_dialog.getText()
-										.toString());
-								CommandeManuelle.this.doPositiveClick();
-							}
-						});
-				builder.setNegativeButton(android.R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// User cancelled the dialog
-								CommandeManuelle.this.doNegativeClick();
-							}
-						});
-			}
-
-			if (getTag().compareTo(DIALOG_CONNEXION_SOCKET_ERREUR) == 0) {
-				builder.setTitle("Erreur de Connexion");
-				builder.setPositiveButton(android.R.string.ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// Click sur le boutton OK
-								CommandeManuelle.this.doNegativeClick();
-							}
-						});
-			}
-
-			// Create the AlertDialog object and return it
-			return builder.create();
+		// On ferme le Client socket à la fermeture de l'application
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}
-
-	public void showDialog(String tag) {
-		connexionDialog.show(getFragmentManager(), tag);
+		
+		super.onDestroy();
 	}
 
 }

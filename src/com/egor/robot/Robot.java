@@ -13,8 +13,11 @@ public class Robot {
 	public Axe roulis = new Axe(Articulation.ROULIS);
 	public Pince pince = new Pince();
 	
-	public String calculeRotation(String art, int sense) {
-		return art;
+	public String calculeRotation(String art, int sense, float valeur, int vitesse) {
+		if(sense == POSITIVE) {
+			return art + valeur + ":" + vitesse;
+		}
+		return art + "-" + valeur + ":" + vitesse;
 	}
 	
 	
