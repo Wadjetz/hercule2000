@@ -9,8 +9,31 @@
     tools:context=".GyroscopeCommande" >
 
     <TextView
+        android:id="@+id/aX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignBottom="@+id/aY"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="28dp"
+        android:layout_marginLeft="35dp"
+        android:text="@string/x" />
+
+    <TextView
+        android:id="@+id/aZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/aY"
+        android:layout_below="@+id/aX"
+        android:layout_marginTop="20dp"
+        android:text="@string/z" />
+
+    <TextView
+        android:id="@+id/aY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/aX"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="89dp"
+        android:text="@string/y" />
 
 </RelativeLayout>
