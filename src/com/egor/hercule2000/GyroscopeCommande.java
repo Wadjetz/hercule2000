@@ -17,20 +17,13 @@ import android.widget.TextView;
 @SuppressLint("HandlerLeak")
 public class GyroscopeCommande extends Activity implements SensorEventListener {
 	protected static final int AUTRES = 0003;
-	private SensorManager mSensorManager;
-	private Sensor mSensor;
-
-	private float axisX = 0;
-	private float axisY = 0;
-	private float axisZ = 0;
+	private SensorManager sensorManager;
+	private Sensor accelerometer;
+	private float x, y, z;
 
 	private TextView tX = null;
 	private TextView tY = null;
 	private TextView tZ = null;
-
-	private static final float NS2S = 1.0f / 1000000000.0f;
-	private final float[] deltaRotationVector = new float[4];
-	private float timestamp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +35,33 @@ public class GyroscopeCommande extends Activity implements SensorEventListener {
 		tX = (TextView) findViewById(R.id.aX);
 		tY = (TextView) findViewById(R.id.aY);
 		tZ = (TextView) findViewById(R.id.aZ);
+		// Instanicer le SensorManager
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		// Instancier l'accéléromètre
+		accelerometer = sensorManager
+				.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-		mSensorManager.registerListener(this, mSensor,
-				SensorManager.SENSOR_DELAY_NORMAL);
+	}
+
+	@Override
+	protected void onResume() {
+
+		sensorManager.registerListener(this, accelerometer,
+				SensorManager.SENSOR_DELAY_UI);
+		
+		
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
 	}
 
 	@Override
 	protected void onDestroy() {
-		mSensorManager.unregisterListener(this);
+		sensorManager.unregisterListener(this);
 		super.onDestroy();
 	}
 
@@ -61,9 +71,9 @@ public class GyroscopeCommande extends Activity implements SensorEventListener {
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
 			case AUTRES:
-				tX.setText("X:" + axisX);
-				tY.setText("Y:" + axisY);
-				tZ.setText("Z:" + axisZ);
+				tX.setText("X:" + x);
+				tY.setText("Y:" + y);
+				tZ.setText("Z:" + z);
 				break;
 			}
 		};
@@ -111,59 +121,14 @@ public class GyroscopeCommande extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-
-		// axisX = event.values[0];
-		// axisY = event.values[1];
-		// axisZ = event.values[2];
-		//
-
-		// This timestep's delta rotation to be multiplied by the current
-		// rotation
-		// after computing it from the gyro sample data.
-		if (timestamp != 0) {
-			final float dT = (event.timestamp - timestamp) * NS2S;
-			// Axis of the rotation sample, not normalized yet.
-			axisX = event.values[0];
-			axisY = event.values[1];
-			axisZ = event.values[2];
-
-			// Calculate the angular speed of the sample
-			float omegaMagnitude = (float) Math.sqrt(axisX * axisX + axisY
-					* axisY + axisZ * axisZ);
-
-			// Normalize the rotation vector if it's big enough to get the axis
-			// (that is, EPSILON should represent your maximum allowable margin
-			// of error)
-			if (omegaMagnitude > 100) {
-				axisX /= omegaMagnitude;
-				axisY /= omegaMagnitude;
-				axisZ /= omegaMagnitude;
-			}
-
-			// Integrate around this axis with the angular speed by the timestep
-			// in order to get a delta rotation from this sample over the
-			// timestep
-			// We will convert this axis-angle representation of the delta
-			// rotation
-			// into a quaternion before turning it into the rotation matrix.
-			float thetaOverTwo = omegaMagnitude * dT / 2.0f;
-			float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
-			float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
-			deltaRotationVector[0] = sinThetaOverTwo * axisX;
-			deltaRotationVector[1] = sinThetaOverTwo * axisY;
-			deltaRotationVector[2] = sinThetaOverTwo * axisZ;
-			deltaRotationVector[3] = cosThetaOverTwo;
+		// Récupérer les valeurs du capteur
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+		    x = event.values[0];
+		    y = event.values[1];
+		    z = event.values[2];
+		    
+		    handler.sendEmptyMessage(AUTRES);
 		}
-		timestamp = event.timestamp;
-		float[] deltaRotationMatrix = new float[9];
-		SensorManager.getRotationMatrixFromVector(deltaRotationMatrix,
-				deltaRotationVector);
-		// User code should concatenate the delta rotation we computed with the
-		// current rotation
-		// in order to get the updated rotation.
-		// rotationCurrent = rotationCurrent * deltaRotationMatrix;
-
-		handler.sendEmptyMessage(AUTRES);
 	}
 
 }

@@ -3,6 +3,7 @@ package com.egor.hercule2000;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,6 +16,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		
 		((Button)findViewById(R.id.commande_manuelle)).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -25,9 +27,18 @@ public class MainActivity extends Activity {
 		((Button)findViewById(R.id.commande_gyroscope)).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this, GyroscopeCommande.class));
+				startActivity(new Intent(MainActivity.this, AccelerometreCommande.class));
 			}
 		});
+		
+		
+		((Button)findViewById(R.id.commande_acceleration)).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, SensorAccelerationTutoActivity.class));
+			}
+		});
+		
 	}
 
 	@Override

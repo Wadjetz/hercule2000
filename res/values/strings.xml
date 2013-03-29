@@ -11,7 +11,8 @@
     <string name="connexion">Connexion</string>
     <string name="envoyer">Envoyer</string>
     <string name="commande_manuelle">Commande manuelle</string>
-    <string name="commande_gyroscope">Commande gyroscope</string>
+    <string name="commande_gyroscope">Test Gyroscope</string>
+    <string name="commande_acceleration">Test Acceleration</string>
     <string name="base">BASE</string>
     <string name="epaule">EPAULE</string>
     <string name="coude">COUDE</string>
@@ -26,7 +27,11 @@
     <string name="serrer">Serrer</string>
     <string name="relacher">Relâcher</string>
     <string name="title_activity_gyroscope_commande">GyroscopeCommande</string>
-	<string name="x">X</string>
-	<string name="y">Y</string>
-	<string name="z">Z</string>
+    <string name="x">X</string>
+    <string name="y">Y</string>
+    <string name="z">Z</string>
+    <string name="spinner_prompt">Choose a sensor</string>
+    <string name="magnetic_value">The gyroscope value (R/s) is\r\n(%1$s,\r\n%2$s,\r\n%3$s)\r\n </string>
+    <string name="title_activity_accelerometre_commande">AccelerometreCommande</string>
+
 </resources>

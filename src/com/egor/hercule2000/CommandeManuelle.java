@@ -23,7 +23,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.egor.robot.Robot;
 
-@SuppressLint("HandlerLeak")
 public class CommandeManuelle extends Activity {
 
 	/* ----------------------- ATTRIBUTS ------------------- */

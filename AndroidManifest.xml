@@ -25,6 +25,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.egor.hercule2000.SensorAccelerationTutoActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.egor.hercule2000.SensorGyroscopeTutoActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
             android:name="com.egor.hercule2000.CommandeManuelle"
             android:label="@string/title_activity_commande_manuelle" >
             <meta-data
@@ -34,6 +42,13 @@
         <activity
             android:name="com.egor.hercule2000.GyroscopeCommande"
             android:label="@string/title_activity_gyroscope_commande" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.egor.hercule2000.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.egor.hercule2000.AccelerometreCommande"
+            android:label="@string/title_activity_accelerometre_commande" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.egor.hercule2000.MainActivity" />

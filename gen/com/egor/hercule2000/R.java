@@ -8,6 +8,9 @@
 package com.egor.hercule2000;
 
 public final class R {
+    public static final class array {
+        public static final int sensors=0x7f040000;
+    }
     public static final class attr {
     }
     public static final class dimen {
@@ -17,70 +20,86 @@ public final class R {
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     
          */
-        public static final int activity_horizontal_margin=0x7f040000;
-        public static final int activity_vertical_margin=0x7f040001;
+        public static final int activity_horizontal_margin=0x7f050000;
+        public static final int activity_vertical_margin=0x7f050001;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int aX=0x7f080002;
-        public static final int aY=0x7f080003;
-        public static final int aZ=0x7f080004;
-        public static final int action_settings=0x7f08000e;
-        public static final int commande_gyroscope=0x7f080007;
-        public static final int commande_manuelle=0x7f080006;
-        public static final int description=0x7f080005;
-        public static final int edt_ip_connexion_dialog=0x7f08000b;
-        public static final int edt_port_connexion_dialog=0x7f08000d;
-        public static final int seekBarVitesse=0x7f080009;
-        public static final int test=0x7f080001;
-        public static final int txv_vitesse_commande_manuelle=0x7f080008;
-        public static final int txw_ip_connexion_dialog=0x7f08000a;
-        public static final int txw_port_connexion_dialog=0x7f08000c;
-        public static final int vitesse=0x7f080000;
+        public static final int TextView01=0x7f090015;
+        public static final int aX=0x7f090003;
+        public static final int aY=0x7f090004;
+        public static final int aZ=0x7f090005;
+        public static final int accelerationMoniteur=0x7f090000;
+        public static final int action_settings=0x7f090016;
+        public static final int commande_acceleration=0x7f090009;
+        public static final int commande_gyroscope=0x7f090008;
+        public static final int commande_manuelle=0x7f090007;
+        public static final int description=0x7f090006;
+        public static final int edt_ip_connexion_dialog=0x7f09000d;
+        public static final int edt_port_connexion_dialog=0x7f09000f;
+        public static final int layoutOfXYAcceleration=0x7f090014;
+        public static final int progressBarX=0x7f090011;
+        public static final int progressBarY=0x7f090012;
+        public static final int progressBarZ=0x7f090013;
+        public static final int seekBarVitesse=0x7f09000b;
+        public static final int spinner=0x7f090010;
+        public static final int test=0x7f090002;
+        public static final int txv_vitesse_commande_manuelle=0x7f09000a;
+        public static final int txw_ip_connexion_dialog=0x7f09000c;
+        public static final int txw_port_connexion_dialog=0x7f09000e;
+        public static final int vitesse=0x7f090001;
     }
     public static final class layout {
-        public static final int activity_commande_manuelle=0x7f030000;
-        public static final int activity_gyroscope_commande=0x7f030001;
-        public static final int activity_main=0x7f030002;
-        public static final int commande_manuelle=0x7f030003;
-        public static final int connexion_dialog=0x7f030004;
+        public static final int activity_accelerometre_commande=0x7f030000;
+        public static final int activity_commande_manuelle=0x7f030001;
+        public static final int activity_gyroscope_commande=0x7f030002;
+        public static final int activity_main=0x7f030003;
+        public static final int commande_manuelle=0x7f030004;
+        public static final int connexion_dialog=0x7f030005;
+        public static final int main=0x7f030006;
+        public static final int spinnertext=0x7f030007;
     }
     public static final class menu {
-        public static final int commande_manuelle=0x7f070000;
-        public static final int gyroscope_commande=0x7f070001;
-        public static final int main=0x7f070002;
+        public static final int accelerometre_commande=0x7f080000;
+        public static final int commande_manuelle=0x7f080001;
+        public static final int gyroscope_commande=0x7f080002;
+        public static final int main=0x7f080003;
     }
     public static final class string {
-        public static final int action_settings=0x7f050001;
-        public static final int adresse_ip=0x7f050003;
-        public static final int app_name=0x7f050000;
-        public static final int base=0x7f05000b;
-        public static final int commande_gyroscope=0x7f05000a;
-        public static final int commande_manuelle=0x7f050009;
-        public static final int connexion=0x7f050007;
-        public static final int connexion_reseau=0x7f050014;
-        public static final int coude=0x7f05000d;
-        public static final int envoyer=0x7f050008;
-        public static final int epaule=0x7f05000c;
-        public static final int hello_world=0x7f050002;
-        public static final int ip_default=0x7f050004;
-        public static final int moin=0x7f050013;
-        public static final int pince=0x7f050010;
-        public static final int plus=0x7f050012;
-        public static final int port=0x7f050005;
-        public static final int port_default=0x7f050006;
-        public static final int relacher=0x7f050017;
-        public static final int roulis=0x7f05000f;
-        public static final int serrer=0x7f050016;
-        public static final int tangage=0x7f05000e;
-        public static final int title_activity_commande_manuelle=0x7f050015;
-        public static final int title_activity_gyroscope_commande=0x7f050018;
-        public static final int vitesse=0x7f050011;
-        public static final int x=0x7f050019;
-        public static final int y=0x7f05001a;
-        public static final int z=0x7f05001b;
+        public static final int action_settings=0x7f060001;
+        public static final int adresse_ip=0x7f060003;
+        public static final int app_name=0x7f060000;
+        public static final int base=0x7f06000c;
+        public static final int commande_acceleration=0x7f06000b;
+        public static final int commande_gyroscope=0x7f06000a;
+        public static final int commande_manuelle=0x7f060009;
+        public static final int connexion=0x7f060007;
+        public static final int connexion_reseau=0x7f060015;
+        public static final int coude=0x7f06000e;
+        public static final int envoyer=0x7f060008;
+        public static final int epaule=0x7f06000d;
+        public static final int hello_world=0x7f060002;
+        public static final int ip_default=0x7f060004;
+        public static final int magnetic_value=0x7f06001e;
+        public static final int moin=0x7f060014;
+        public static final int pince=0x7f060011;
+        public static final int plus=0x7f060013;
+        public static final int port=0x7f060005;
+        public static final int port_default=0x7f060006;
+        public static final int relacher=0x7f060018;
+        public static final int roulis=0x7f060010;
+        public static final int serrer=0x7f060017;
+        public static final int spinner_prompt=0x7f06001d;
+        public static final int tangage=0x7f06000f;
+        public static final int title_activity_accelerometre_commande=0x7f06001f;
+        public static final int title_activity_commande_manuelle=0x7f060016;
+        public static final int title_activity_gyroscope_commande=0x7f060019;
+        public static final int vitesse=0x7f060012;
+        public static final int x=0x7f06001a;
+        public static final int y=0x7f06001b;
+        public static final int z=0x7f06001c;
     }
     public static final class style {
         /** 
@@ -104,10 +123,10 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f060000;
+        public static final int AppBaseTheme=0x7f070000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f060001;
+        public static final int AppTheme=0x7f070001;
     }
 }
