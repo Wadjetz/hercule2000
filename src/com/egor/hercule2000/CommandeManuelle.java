@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
@@ -15,11 +14,14 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.egor.robot.Robot;
 
@@ -36,9 +38,10 @@ public class CommandeManuelle extends Activity {
 	private Socket socket = null;
 	private PrintWriter emetteur = null;
 	// private BufferedReader recepteur = null;
-	
-	private TextView txv_vitesse = null;
+
+	private TextView textView_vitesse = null;
 	private SeekBar seekBar = null;
+	private Button button1 = null;
 	// Adresse IP du PC Contrôleur
 	private String ip;
 	// Numéro de port du PC Contrôleur
@@ -48,7 +51,7 @@ public class CommandeManuelle extends Activity {
 	private DialogFragment connexionDialog = new MDialog();
 	// Robot
 	private Robot robot = new Robot();
-	
+
 	SeekBar.OnSeekBarChangeListener seekBarEvent = new OnSeekBarChangeListener() {
 
 		@Override
@@ -73,7 +76,7 @@ public class CommandeManuelle extends Activity {
 			t.start();
 		}
 	};
-	
+
 	/* ----------------------- METHODES ---------------------- */
 
 	@Override
@@ -82,24 +85,54 @@ public class CommandeManuelle extends Activity {
 		setContentView(R.layout.commande_manuelle);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		
+
 		seekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
-		txv_vitesse = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
+		textView_vitesse = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
 		seekBar.setOnSeekBarChangeListener(seekBarEvent);
 		seekBar.setProgress(30);
 		// On affiche le dialog de connexion
 		showDialog(MDialog.DIALOG_CONNEXION_SOCKET);
+
+		button1 = (Button) findViewById(R.id.button1);
+		button1.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+
+				int action = event.getAction();
+				int i=0;
+				while (i<100) {
+					Log.d("Egor", "Envoie");
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if (action == MotionEvent.ACTION_CANCEL) {
+						break;
+					}
+					i++;
+				}
+				Log.d("Egor", "Envoie FIN");
+				return false;
+			}
+		});
+
 	}
 
 	public void rotationNegative(View view) {
-		emission(robot
-				.calculeRotation(view.getTag().toString().substring(0, 1), Robot.NEGATIVE, 100, vitesse));
+		emission(robot.calculeRotation(
+				view.getTag().toString().substring(0, 1), Robot.NEGATIVE, 100,
+				vitesse));
 		Log.d("Egor", "rotationNegative" + view.getTag());
+
 	}
 
 	public void rotationPositive(View view) {
-		emission(robot
-				.calculeRotation(view.getTag().toString().substring(0, 1), Robot.POSITIVE, 50, vitesse));
+		emission(robot.calculeRotation(
+				view.getTag().toString().substring(0, 1), Robot.POSITIVE, 50,
+				vitesse));
 		Log.d("Egor", "rotationPositive" + view.getTag());
 	}
 
@@ -146,7 +179,7 @@ public class CommandeManuelle extends Activity {
 				break;
 			case SEEK_BAR_CHANGMENT:
 				vitesse = seekBar.getProgress() + 1;
-				txv_vitesse.setText("Vitesse : " + vitesse);
+				textView_vitesse.setText("Vitesse : " + vitesse);
 				break;
 			case AUTRES:
 				if (socket != null) {
@@ -224,7 +257,7 @@ public class CommandeManuelle extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		super.onDestroy();
 	}
 

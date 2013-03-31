@@ -27,28 +27,29 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int TextView01=0x7f090015;
+        public static final int TextView01=0x7f090016;
         public static final int aX=0x7f090003;
         public static final int aY=0x7f090004;
         public static final int aZ=0x7f090005;
         public static final int accelerationMoniteur=0x7f090000;
-        public static final int action_settings=0x7f090016;
+        public static final int action_settings=0x7f090017;
+        public static final int button1=0x7f09000c;
         public static final int commande_acceleration=0x7f090009;
         public static final int commande_gyroscope=0x7f090008;
         public static final int commande_manuelle=0x7f090007;
         public static final int description=0x7f090006;
-        public static final int edt_ip_connexion_dialog=0x7f09000d;
-        public static final int edt_port_connexion_dialog=0x7f09000f;
-        public static final int layoutOfXYAcceleration=0x7f090014;
-        public static final int progressBarX=0x7f090011;
-        public static final int progressBarY=0x7f090012;
-        public static final int progressBarZ=0x7f090013;
+        public static final int edt_ip_connexion_dialog=0x7f09000e;
+        public static final int edt_port_connexion_dialog=0x7f090010;
+        public static final int layoutOfXYAcceleration=0x7f090015;
+        public static final int progressBarX=0x7f090012;
+        public static final int progressBarY=0x7f090013;
+        public static final int progressBarZ=0x7f090014;
         public static final int seekBarVitesse=0x7f09000b;
-        public static final int spinner=0x7f090010;
+        public static final int spinner=0x7f090011;
         public static final int test=0x7f090002;
         public static final int txv_vitesse_commande_manuelle=0x7f09000a;
-        public static final int txw_ip_connexion_dialog=0x7f09000c;
-        public static final int txw_port_connexion_dialog=0x7f09000e;
+        public static final int txw_ip_connexion_dialog=0x7f09000d;
+        public static final int txw_port_connexion_dialog=0x7f09000f;
         public static final int vitesse=0x7f090001;
     }
     public static final class layout {
