@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 
-public class AccelerometreMoniteur extends View {
+public class AccelerometreView extends View {
 	
 	private static final String LOG_TAG = "Egor";
 	
@@ -61,7 +61,7 @@ public class AccelerometreMoniteur extends View {
 			}
 		}});
 	
-	public AccelerometreMoniteur(Context context) {
+	public AccelerometreView(Context context) {
 		super(context);
 		
 		

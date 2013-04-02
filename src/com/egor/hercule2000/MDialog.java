@@ -41,7 +41,7 @@ public class MDialog extends DialogFragment {
 							String ip = ip_dialog.getText().toString();
 							int port = Integer.parseInt(port_dialog.getText()
 									.toString());
-							((CommandeManuelle) getActivity()).doPositiveClick(
+							((Telecommande) getActivity()).doPositiveClick(
 									ip, port);
 						}
 					});
@@ -50,7 +50,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// User cancelled the dialog
-							((CommandeManuelle) getActivity())
+							((Telecommande) getActivity())
 									.doNegativeClick();
 						}
 					});
@@ -63,7 +63,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// Click sur le boutton OK
-							((CommandeManuelle) getActivity())
+							((Telecommande) getActivity())
 									.doNegativeClick();
 						}
 					});

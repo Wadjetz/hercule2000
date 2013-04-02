@@ -6,7 +6,8 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/vitesse" >
 
         <TextView
             android:id="@+id/txv_vitesse_commande_manuelle"
@@ -22,200 +23,152 @@
         android:id="@+id/seekBarVitesse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/vitesse"
         android:max="29" />
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/articulation" >
 
-        <Button
+        <EditText
+            android:id="@+id/basePosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/base"
-            android:text="@string/moin" />
+            android:ems="10"
+            android:inputType="numberSigned" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/base" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/base"
-            android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/articulation" >
 
-        <Button
+        <EditText
+            android:id="@+id/epaulePosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/epaule"
-            android:text="@string/moin" />
+            android:ems="10"
+            android:inputType="numberSigned" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/epaule" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/epaule"
-            android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/articulation" >
 
-        <Button
+        <EditText
+            android:id="@+id/coudePosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/coude"
-            android:text="@string/moin" />
+            android:ems="10"
+            android:inputType="numberSigned" >
+        </EditText>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/coude" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/coude"
-            android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/articulation" >
 
-        <Button
+        <EditText
+            android:id="@+id/tangagePosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/tangage"
-            android:text="@string/moin" />
+            android:ems="10"
+            android:inputType="numberSigned" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/tangage" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/tangage"
-            android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/articulation" >
 
-        <Button
+        <EditText
+            android:id="@+id/roulisPosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/roulis"
-            android:text="@string/moin" />
+            android:ems="10"
+            android:inputType="numberSigned" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/roulis" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/roulis"
-            android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/pince" >
 
-        <Button
+        <EditText
+            android:id="@+id/pinceCouple"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/pince"
-            android:text="@string/serrer" />
+            android:ems="10"
+            android:inputType="numberSigned" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:layout_alignParentLeft="true"
             android:text="@string/pince" />
+    </RelativeLayout>
 
-        <Button
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/pince"
+        android:orientation="vertical" >
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/pince"
-            android:text="@string/relacher" />
-    </RelativeLayout>
+            android:text="@string/couple" />
+
+        <SeekBar
+            android:id="@+id/pinceDurer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/B_Enoyer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button" />
-
-    
+        android:gravity="center"
+        android:text="@string/envoyer" />
 
 </LinearLayout>

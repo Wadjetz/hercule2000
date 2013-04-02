@@ -10,7 +10,7 @@ import android.support.v4.app.NavUtils;
 public class AccelerometreCommande extends Activity {
 	
 	private static final String LOG_TAG = "Egor";
-	private AccelerometreMoniteur accelerometreMoniteur;
+	private AccelerometreView accelerometreMoniteur;
 	LinearLayout accelerationLayout;
 	
 	
@@ -24,7 +24,7 @@ public class AccelerometreCommande extends Activity {
 		
 		
 		accelerationLayout = (LinearLayout) findViewById(R.id.layoutOfXYAcceleration);
-		accelerometreMoniteur = new AccelerometreMoniteur(this);
+		accelerometreMoniteur = new AccelerometreView(this);
 		
 		LinearLayout.LayoutParams layoutParam = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);

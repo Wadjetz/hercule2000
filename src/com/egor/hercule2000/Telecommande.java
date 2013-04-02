@@ -17,27 +17,22 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.egor.robot.Robot;
 
-public class CommandeManuelle extends Activity implements
-		SeekBar.OnSeekBarChangeListener, OnClickListener {
+public class Telecommande extends Activity implements
+		SeekBar.OnSeekBarChangeListener {
 
-	private float articulations[]  = new float[5];
-	private float saveArticulations[] = new float[5];
-	
-	private EditText ET_Base = null, ET_Epaule = null, ET_Coude = null,
-			ET_Tangage = null, ET_Roulis = null;
+	private Button button1 = null;
 
-	private Button envoyer = null;
-
+	// Robot
 	private Robot robot = new Robot();
 
 	/* ----------------------- ATTRIBUTS ------------------- */
@@ -65,7 +60,6 @@ public class CommandeManuelle extends Activity implements
 	 * IHM : Affiche la vitesse de deplacement du robot
 	 */
 	private TextView vitesseTextView = null;
-
 	/**
 	 * IHM : Change la vitesse de deplacement du robot
 	 */
@@ -126,7 +120,7 @@ public class CommandeManuelle extends Activity implements
 			case AUTRES:
 				try {
 					String r = "rien";
-					// r = recepteur.readLine();
+					//r = recepteur.readLine();
 					while ((r = recepteur.readLine()) != null) {
 						Log.d(LOG_TAG, "Recu : " + r);
 					}
@@ -153,8 +147,7 @@ public class CommandeManuelle extends Activity implements
 						Log.d(LOG_TAG, "ipDist NOT NULL");
 						emetteur = new PrintWriter(socket.getOutputStream(),
 								true);
-						recepteur = new BufferedReader(new InputStreamReader(
-								socket.getInputStream()));
+						recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						emission("M");
 					} else {
 						Log.d(LOG_TAG, "ipDist NULL");
@@ -176,37 +169,50 @@ public class CommandeManuelle extends Activity implements
 		}
 	});
 
+	/* ----------------------- METHODES ---------------------- */
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.commande_manuelle);
+		setContentView(R.layout.telecommande);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		Log.d(LOG_TAG, "onCreate");
+		vitesseTextView = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
 
-		ET_Base = (EditText) findViewById(R.id.basePosition);
-		ET_Epaule = (EditText) findViewById(R.id.epaulePosition);
-		ET_Coude = (EditText) findViewById(R.id.coudePosition);
-		ET_Tangage = (EditText) findViewById(R.id.tangagePosition);
-		ET_Roulis = (EditText) findViewById(R.id.roulisPosition);
-		envoyer = (Button) findViewById(R.id.B_Enoyer);
-		envoyer.setOnClickListener(this);
-		getPosition();
-		setPositionView();
-	}
+		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
+		vitesseSeekBar.setOnSeekBarChangeListener(this);
+		vitesseSeekBar.setProgress(vitesse);
 
-	@Override
-	protected void onDestroy() {
-		Log.d(LOG_TAG, "onDestroy");
-		if (socket != null) {
-			// On ferme le Client socket à la fermeture de l'application
-			try {
-				Log.d(LOG_TAG, "onDestroy : Socket NUT NULL");
-				socket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+		// On affiche le dialog de connexion
+		showDialog(MDialog.DIALOG_CONNEXION_SOCKET);
+
+		// TEST
+		button1 = (Button) findViewById(R.id.button1);
+		button1.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				//t.start();
+//				int action = event.getAction();
+//				int i = 0;
+//				while (i < 100) {
+//					Log.d(LOG_TAG, "Envoie");
+//					try {
+//						Thread.sleep(500);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//					if (action == MotionEvent.ACTION_CANCEL) {
+//						break;
+//					}
+//					i++;
+//				}
+//				Log.d(LOG_TAG, "Envoie FIN");
+				return false;
 			}
-		}
-		super.onDestroy();
+		});
+
 	}
 
 	public void afficherMessageToast(String msg) {
@@ -251,7 +257,7 @@ public class CommandeManuelle extends Activity implements
 		if (socket != null) {
 			if (socket.isConnected()) {
 				emetteur.println(msg);
-				// handler.sendEmptyMessage(AUTRES);
+				//handler.sendEmptyMessage(AUTRES);
 			} else {
 				Log.d(LOG_TAG, "Emission Erreur Socket NOT CONNECTED");
 			}
@@ -260,7 +266,7 @@ public class CommandeManuelle extends Activity implements
 			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
 		}
 	}
-
+	
 	private Thread t = new Thread(new Runnable() {
 
 		@Override
@@ -276,27 +282,8 @@ public class CommandeManuelle extends Activity implements
 
 		}
 	});
-
-	/**
-	 * SeekBar événement : changement de vitesse
-	 */
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {
-		Log.d(LOG_TAG, "onProgressChanged SeekBar");
-		handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGMENT);
-
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
-	}
+	
+	/* Menu et Navigation */
 
 	/**
 	 * Set up the {@link android.app.ActionBar}.
@@ -332,38 +319,39 @@ public class CommandeManuelle extends Activity implements
 	}
 
 	@Override
-	public void onClick(View v) {
-		
-		getPositionView();
-		afficherMessageToast("");
+	protected void onDestroy() {
+		Log.d(LOG_TAG, "onDestroy");
+		if (socket != null) {
+			// On ferme le Client socket à la fermeture de l'application
+			try {
+				Log.d(LOG_TAG, "onDestroy : Socket NUT NULL");
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		super.onDestroy();
 	}
 
-	public void getPosition() {
-		for(int i=0; i<5; i++) {
-			articulations[i] = (float)Math.random() * 60;
-		}
+	/**
+	 * SeekBar événement : changement de vitesse
+	 */
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		Log.d(LOG_TAG, "onProgressChanged SeekBar");
+		handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGMENT);
+
 	}
-	
-	public void savePosition() {
-		for(int i=0; i<5; i++) {
-			articulations[i] = saveArticulations[i];
-		}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
 	}
-	
-	public void getPositionView() {
-		articulations[0] = Float.valueOf(ET_Base.getText().toString());
-		articulations[1] = Float.valueOf(ET_Epaule.getText().toString());
-		articulations[2] = Float.valueOf(ET_Coude.getText().toString());
-		articulations[3] = Float.valueOf(ET_Tangage.getText().toString());
-		articulations[4] = Float.valueOf(ET_Roulis.getText().toString());
-	}
-	
-	public void setPositionView() {
-		ET_Base.setText(String.valueOf(articulations[0]));
-		ET_Epaule.setText(String.valueOf(articulations[1]));
-		ET_Coude.setText(String.valueOf(articulations[2]));
-		ET_Tangage.setText(String.valueOf(articulations[3]));
-		ET_Roulis.setText(String.valueOf(articulations[4]));
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
 	}
 
 }

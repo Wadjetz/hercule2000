@@ -33,5 +33,6 @@
     <string name="spinner_prompt">Choose a sensor</string>
     <string name="magnetic_value">The gyroscope value (R/s) is\r\n(%1$s,\r\n%2$s,\r\n%3$s)\r\n </string>
     <string name="title_activity_accelerometre_commande">AccelerometreCommande</string>
-
+    <string name="title_activity_telecommande">Télécommande</string>
+    <string name="couple">Couple</string>
 </resources>

@@ -13,6 +13,11 @@ public final class R {
     }
     public static final class attr {
     }
+    public static final class color {
+        public static final int articulation=0x7f080002;
+        public static final int pince=0x7f080000;
+        public static final int vitesse=0x7f080001;
+    }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
 
@@ -27,46 +32,57 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int TextView01=0x7f090016;
-        public static final int aX=0x7f090003;
-        public static final int aY=0x7f090004;
-        public static final int aZ=0x7f090005;
-        public static final int accelerationMoniteur=0x7f090000;
-        public static final int action_settings=0x7f090017;
-        public static final int button1=0x7f09000c;
-        public static final int commande_acceleration=0x7f090009;
-        public static final int commande_gyroscope=0x7f090008;
-        public static final int commande_manuelle=0x7f090007;
-        public static final int description=0x7f090006;
-        public static final int edt_ip_connexion_dialog=0x7f09000e;
-        public static final int edt_port_connexion_dialog=0x7f090010;
-        public static final int layoutOfXYAcceleration=0x7f090015;
-        public static final int progressBarX=0x7f090012;
-        public static final int progressBarY=0x7f090013;
-        public static final int progressBarZ=0x7f090014;
-        public static final int seekBarVitesse=0x7f09000b;
-        public static final int spinner=0x7f090011;
-        public static final int test=0x7f090002;
-        public static final int txv_vitesse_commande_manuelle=0x7f09000a;
-        public static final int txw_ip_connexion_dialog=0x7f09000d;
-        public static final int txw_port_connexion_dialog=0x7f09000f;
-        public static final int vitesse=0x7f090001;
+        public static final int B_Enoyer=0x7f0a0014;
+        public static final int TextView01=0x7f0a001e;
+        public static final int aX=0x7f0a0004;
+        public static final int aY=0x7f0a0005;
+        public static final int aZ=0x7f0a0006;
+        public static final int accelerationMoniteur=0x7f0a0001;
+        public static final int action_settings=0x7f0a0020;
+        public static final int basePosition=0x7f0a000d;
+        public static final int button1=0x7f0a001f;
+        public static final int commande_acceleration=0x7f0a000a;
+        public static final int commande_gyroscope=0x7f0a0009;
+        public static final int commande_manuelle=0x7f0a0008;
+        public static final int coudePosition=0x7f0a000f;
+        public static final int description=0x7f0a0007;
+        public static final int edt_ip_connexion_dialog=0x7f0a0016;
+        public static final int edt_port_connexion_dialog=0x7f0a0018;
+        public static final int epaulePosition=0x7f0a000e;
+        public static final int layoutOfXYAcceleration=0x7f0a001d;
+        public static final int listView_acceuil_commandes=0x7f0a0000;
+        public static final int pinceCouple=0x7f0a0012;
+        public static final int pinceDurer=0x7f0a0013;
+        public static final int progressBarX=0x7f0a001a;
+        public static final int progressBarY=0x7f0a001b;
+        public static final int progressBarZ=0x7f0a001c;
+        public static final int roulisPosition=0x7f0a0011;
+        public static final int seekBarVitesse=0x7f0a000c;
+        public static final int spinner=0x7f0a0019;
+        public static final int tangagePosition=0x7f0a0010;
+        public static final int test=0x7f0a0003;
+        public static final int txv_vitesse_commande_manuelle=0x7f0a000b;
+        public static final int txw_ip_connexion_dialog=0x7f0a0015;
+        public static final int txw_port_connexion_dialog=0x7f0a0017;
+        public static final int vitesse=0x7f0a0002;
     }
     public static final class layout {
-        public static final int activity_accelerometre_commande=0x7f030000;
-        public static final int activity_commande_manuelle=0x7f030001;
-        public static final int activity_gyroscope_commande=0x7f030002;
-        public static final int activity_main=0x7f030003;
-        public static final int commande_manuelle=0x7f030004;
-        public static final int connexion_dialog=0x7f030005;
-        public static final int main=0x7f030006;
-        public static final int spinnertext=0x7f030007;
+        public static final int accueil=0x7f030000;
+        public static final int activity_accelerometre_commande=0x7f030001;
+        public static final int activity_commande_manuelle1=0x7f030002;
+        public static final int activity_gyroscope_commande=0x7f030003;
+        public static final int activity_main=0x7f030004;
+        public static final int commande_manuelle=0x7f030005;
+        public static final int connexion_dialog=0x7f030006;
+        public static final int main=0x7f030007;
+        public static final int spinnertext=0x7f030008;
+        public static final int telecommande=0x7f030009;
     }
     public static final class menu {
-        public static final int accelerometre_commande=0x7f080000;
-        public static final int commande_manuelle=0x7f080001;
-        public static final int gyroscope_commande=0x7f080002;
-        public static final int main=0x7f080003;
+        public static final int accelerometre_commande=0x7f090000;
+        public static final int commande_manuelle=0x7f090001;
+        public static final int gyroscope_commande=0x7f090002;
+        public static final int main=0x7f090003;
     }
     public static final class string {
         public static final int action_settings=0x7f060001;
@@ -79,6 +95,7 @@ public final class R {
         public static final int connexion=0x7f060007;
         public static final int connexion_reseau=0x7f060015;
         public static final int coude=0x7f06000e;
+        public static final int couple=0x7f060021;
         public static final int envoyer=0x7f060008;
         public static final int epaule=0x7f06000d;
         public static final int hello_world=0x7f060002;
@@ -97,6 +114,7 @@ public final class R {
         public static final int title_activity_accelerometre_commande=0x7f06001f;
         public static final int title_activity_commande_manuelle=0x7f060016;
         public static final int title_activity_gyroscope_commande=0x7f060019;
+        public static final int title_activity_telecommande=0x7f060020;
         public static final int vitesse=0x7f060012;
         public static final int x=0x7f06001a;
         public static final int y=0x7f06001b;
@@ -106,11 +124,13 @@ public final class R {
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
         
 
         Base application theme for API 11+. This theme completely replaces
