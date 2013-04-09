@@ -6,7 +6,8 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <TextView
             android:id="@+id/txv_vitesse_commande_manuelle"
@@ -22,18 +23,22 @@
         android:id="@+id/seekBarVitesse"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="29" />
+        android:layout_margin="@dimen/margin"
+        android:max="29"
+        android:tag="VITESSE" />
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/BaseNegatif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
+            android:background="@color/MyButton"
             android:tag="@string/base"
             android:text="@string/moin" />
 
@@ -46,25 +51,28 @@
             android:text="@string/base" />
 
         <Button
+            android:id="@+id/BasePositif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
+            android:background="@color/MyButton"
             android:tag="@string/base"
             android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/EpauleNegatif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
+            android:background="@color/MyButton"
             android:tag="@string/epaule"
             android:text="@string/moin" />
 
@@ -77,25 +85,28 @@
             android:text="@string/epaule" />
 
         <Button
+            android:id="@+id/EpaulePositif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
+            android:background="@color/MyButton"
             android:tag="@string/epaule"
             android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/CoudeNegatif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
+            android:background="@color/MyButton"
             android:tag="@string/coude"
             android:text="@string/moin" />
 
@@ -108,25 +119,28 @@
             android:text="@string/coude" />
 
         <Button
+            android:id="@+id/CoudePositif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
+            android:background="@color/MyButton"
             android:tag="@string/coude"
             android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/TangageNegatif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
+            android:background="@color/MyButton"
             android:tag="@string/tangage"
             android:text="@string/moin" />
 
@@ -139,25 +153,28 @@
             android:text="@string/tangage" />
 
         <Button
+            android:id="@+id/TangagePositif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
+            android:background="@color/MyButton"
             android:tag="@string/tangage"
             android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/RoulisNegatif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
+            android:background="@color/MyButton"
             android:tag="@string/roulis"
             android:text="@string/moin" />
 
@@ -170,26 +187,29 @@
             android:text="@string/roulis" />
 
         <Button
+            android:id="@+id/RoulisPositif"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
+            android:background="@color/MyButton"
             android:tag="@string/roulis"
             android:text="@string/plus" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
 
         <Button
+            android:id="@+id/SerrerPince"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationNegative"
-            android:tag="@string/pince"
+            android:background="@color/MyButton"
+            android:tag="@string/pince_serrer"
             android:text="@string/serrer" />
 
         <TextView
@@ -201,21 +221,37 @@
             android:text="@string/pince" />
 
         <Button
+            android:id="@+id/RelacherPince"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:onClick="rotationPositive"
-            android:tag="@string/pince"
+            android:background="@color/MyButton"
+            android:tag="@string/pince_relacher"
             android:text="@string/relacher" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/envoyer" />
+        android:layout_margin="@dimen/margin" >
 
-    
+        <TextView
+            android:id="@+id/coupleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/pince" />
+    </RelativeLayout>
+
+    <SeekBar
+        android:id="@+id/coupleSeekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:max="510"
+        android:tag="COUPLE" />
 
 </LinearLayout>

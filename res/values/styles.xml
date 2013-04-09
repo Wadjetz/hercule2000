@@ -20,5 +20,7 @@
     <color name="pince">#EEE</color>
     <color name="vitesse">#AAA</color>
     <color name="articulation">#DDD</color>
+    <color name="MyButton">#C4C3B2</color>
+    <color name="MyButtonHover">#F52621</color>
 
 </resources>

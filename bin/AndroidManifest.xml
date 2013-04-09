@@ -17,7 +17,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.egor.hercule2000.Accueil"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,36 +27,20 @@
         </activity>
         <activity
             android:name="com.egor.hercule2000.SensorAccelerationTutoActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name="com.egor.hercule2000.SensorGyroscopeTutoActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.egor.hercule2000.Telecommande"
-            android:label="@string/title_activity_telecommande" >
+            android:label="@string/title_activity_telecommande"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.egor.hercule2000.Accueil" />
         </activity>
         <activity
-            android:name="com.egor.hercule2000.GyroscopeCommande"
-            android:label="@string/title_activity_gyroscope_commande" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.egor.hercule2000.Accueil" />
-        </activity>
-        <activity
-            android:name="com.egor.hercule2000.AccelerometreCommande"
-            android:label="@string/title_activity_accelerometre_commande" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.egor.hercule2000.Accueil" />
-        </activity>
-        <activity
-            android:name="com.egor.hercule2000.CommandeManuelle"
-            android:label="@string/title_activity_commande_manuelle" >
+            android:name="com.egor.hercule2000.Accelerometre"
+            android:label="@string/title_activity_accelerometre" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.egor.hercule2000.Accueil" />

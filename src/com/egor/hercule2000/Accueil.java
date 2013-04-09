@@ -22,9 +22,9 @@ public class Accueil extends Activity {
 		
 		String[] listCommandes = new String[]{
 				"Télécommande",
-				"Gyroscope",
-				"Commande Accelerometre",
-				"Commande Manuelle"
+				"Accelerometre",
+				"Commande Accelerometre"
+				
 		};
 		
 		ArrayAdapter<String> adaptateur = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1, listCommandes);
@@ -40,13 +40,10 @@ public class Accueil extends Activity {
 					startActivity(new Intent(Accueil.this, Telecommande.class));
 					break;
 				case 1:
-					startActivity(new Intent(Accueil.this, GyroscopeCommande.class));
+					startActivity(new Intent(Accueil.this, Accelerometre.class));
 					break;
 				case 2:
 					startActivity(new Intent(Accueil.this, SensorAccelerationTutoActivity.class));
-					break;
-				case 3:
-					startActivity(new Intent(Accueil.this, CommandeManuelle.class));
 				}
 			}
 			

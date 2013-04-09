@@ -102,7 +102,8 @@ public class XYAceleromterView extends View {
 			@Override
 			public void handleMessage(Message msg) {
 				super.handleMessage(msg);
-				redraw();
+				invalidate();
+				//redraw();
 			}
 		};
 		// Launching the Thread to update draw
