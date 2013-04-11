@@ -3,9 +3,11 @@
 
     <string name="app_name">Hercule 2000</string>
     <string name="action_settings">Settings</string>
+    <string name="menu_reset">Reset</string>
+    <string name="menu_connexion">Connexion</string>
     <string name="hello_world">Hello world!</string>
     <string name="adresse_ip">Adresse IP</string>
-    <string name="ip_default">192.168.0.103</string>
+    <string name="ip_default">192.168.0.110</string>
     <string name="port">Port</string>
     <string name="port_default">9999</string>
     <string name="connexion">Connexion</string>
@@ -38,5 +40,6 @@
     <string name="title_activity_telecommande">Télécommande</string>
     <string name="couple">Couple</string>
     <string name="title_activity_accelerometre">Accelerometre</string>
+    <string name="reset">Reset</string>
 
 </resources>

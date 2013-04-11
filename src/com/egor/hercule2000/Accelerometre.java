@@ -29,14 +29,21 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	 * SensorManager donne accès aux capteurs de l'appareil
 	 */
 	SensorManager sensorManager;
-
-	private TextView xTextView = null, yTextView = null, zTextView = null;
-
-	float maxRange;
+	
 	/**
 	 * Accéléromètre
 	 */
 	Sensor accelerometre;
+	
+	/**
+	 * Portée maximale du capteur
+	 */
+	float porteeMax;
+	
+	/**
+	 * IHM : affiche les valeurs de l'accéléromètre
+	 */
+	private TextView xTextView = null, yTextView = null, zTextView = null;
 
 	/**
 	 * Display récupère l'orientation de l'appareil
@@ -44,7 +51,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	Display mDisplay;
 
 	/**
-	 * LinearLayout xyAccelerationLayout;
+	 * IHM : Repère de l'accéléromètre
 	 */
 	LinearLayout AccelerationLayout;
 
@@ -69,7 +76,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		mDisplay = ((WindowManager) getSystemService(WINDOW_SERVICE))
 				.getDefaultDisplay();
 
-		maxRange = accelerometre.getMaximumRange();
+		porteeMax = accelerometre.getMaximumRange();
 
 		xTextView = (TextView) findViewById(R.id.xTextView);
 		yTextView = (TextView) findViewById(R.id.yTextView);

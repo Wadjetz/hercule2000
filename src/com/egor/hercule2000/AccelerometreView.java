@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 
 public class AccelerometreView extends View {
@@ -16,6 +15,16 @@ public class AccelerometreView extends View {
 	 * Log Tag pour les messages de debuguages
 	 */
 	public static final String LOG_TAG = "CM_Egor";
+	
+	/**
+	 * La peinture pour dessiner
+	 */
+	private Paint paint = new Paint();
+	
+	/**
+	 * The Canvas to draw within
+	 */
+	private Canvas canvas;
 	
 	/**
 	 * Largeur du canvas
@@ -27,32 +36,19 @@ public class AccelerometreView extends View {
 	 */
 	private int height;
 	
-	/**
-	 * Les valeurs de X et Y de l'accéléromètre
-	 */
-	private float aX = 0, aY = 0;
-	
-	/**
-	 * Vitesse de X et Y
-	 */
-	private float vitesseX, vitesseYy;
-	
-	/**
-	 * The paint to draw the view
-	 */
-	private Paint paint = new Paint();
-	
-	/**
-	 * The Canvas to draw within
-	 */
-	private Canvas canvas;
+	private int xCenter;
+	private int yCenter;
 	
 	/**
 	 * le contexte
 	 */
 	private Accelerometre activity;
-
-	private Handler slowDownDrawingHandler = new Handler() {
+	
+	
+	/**
+	 * Handler redessine le canvas
+	 */
+	private Handler redessiner = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
@@ -86,8 +82,8 @@ public class AccelerometreView extends View {
 							Thread.sleep(2000);
 						} else {
 							Thread.sleep(1000 / 30);
-							myMessage = slowDownDrawingHandler.obtainMessage();
-							slowDownDrawingHandler.sendMessage(myMessage);
+							myMessage = redessiner.obtainMessage();
+							redessiner.sendMessage(myMessage);
 						}
 					}
 				} catch (Throwable t) {
@@ -95,6 +91,7 @@ public class AccelerometreView extends View {
 				}
 			}
 		});
+		
 		// Initialize the threadSafe booleans
 		isRunning.set(true);
 		isPausing.set(false);
@@ -108,33 +105,37 @@ public class AccelerometreView extends View {
 		this.canvas = canvas;
 		width = this.getWidth();
 		height = this.getHeight();
+		// On récupère les valeurs de X et Y de centre du canvas
+		xCenter = width / 2;
+		yCenter = height /2;
+		
 		dessinerTous();
 		super.onDraw(canvas);
 	}
 
 	private void dessinerTous() {
-		
-		// On récupère les valeurs de X et Y de l'accéléromètre
-		this.aX = activity.aX ;
-		this.aY = activity.aY;
-		// On récupère les valeurs de X et Y de centre du canvas
-		int xCenter = width / 2;
-		int yCenter = height / 2;
+
 		// Rayon maximale
 		int maxRayon = Math.max(width, height) / 2;
 		
-		dessinerCercleLimite(xCenter, yCenter, yCenter/2);
-		dessinerCercleNeutre(xCenter, yCenter, yCenter/4);
-		dessinerLignesDiagonale(xCenter, yCenter);
-		dessinerCerclePointAccelerometre(xCenter, yCenter, maxRayon, aX, aY);
+		dessinerCercleLimite();
+		dessinerCercleNeutre();
+		
+		dessinerLignesDiagonale();
+		dessinerCerclePointAccelerometre(maxRayon, activity.aX, activity.aY);
 	}
 
-	private void dessinerCercleLimite(float xCenter, float yCenter, float rayon) {
+	private void dessinerCercleLimite() {
 		paint.setARGB(255, 0, 255, 0);
-		canvas.drawCircle(xCenter, yCenter, rayon, paint);
+		canvas.drawCircle(xCenter, yCenter, yCenter/2, paint);
 	}
-
-	private void dessinerLignesDiagonale(int xCenter, int yCenter) {
+	
+	private void dessinerCercleNeutre() {
+		paint.setARGB(255, 255, 255, 0);
+		canvas.drawCircle(xCenter, yCenter, yCenter/4, paint);
+	}
+	
+	private void dessinerLignesDiagonale() {
 		paint.setARGB(255, 0, 0, 0);
 		
 		//Dessine une ligne
@@ -144,17 +145,12 @@ public class AccelerometreView extends View {
 		canvas.drawLine(width, height, xCenter, yCenter, paint);
 		
 	}
-
-	private void dessinerCercleNeutre(float x, float y, float rayon) {
-		paint.setARGB(255, 255, 255, 0);
-		canvas.drawCircle(x, y, rayon, paint);
-	}
 	
-	private void dessinerCerclePointAccelerometre(int xCenter, int yCenter, int maxRayon, float x, float y) {
+	private void dessinerCerclePointAccelerometre(int maxRayon, float x, float y) {
 		// Calcule des coordonée a afficher
-		float xToDisp = (activity.aX * maxRayon) / activity.maxRange;
-		float yToDisp = (activity.aY * maxRayon) / activity.maxRange;
-		float zToDisp = (activity.aZ * maxRayon) / activity.maxRange;
+		float xToDisp = (activity.aX * maxRayon) / activity.porteeMax;
+		float yToDisp = (activity.aY * maxRayon) / activity.porteeMax;
+		float zToDisp = (activity.aZ * maxRayon) / activity.porteeMax;
 		activity.setAxes(xToDisp, yToDisp, zToDisp);
 		
 		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 15, paint);

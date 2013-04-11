@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -103,29 +102,65 @@ public class Telecommande extends Activity implements
 	 * Numéro de port du PC Contrôleur
 	 */
 	private int port;
-
-	private OnTouchListener negatif = new OnTouchListener() {
+	
+	/**
+	 * Listener : Serre la pince du robot
+	 */
+	private OnTouchListener serrerPince = new OnTouchListener() {
+		
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
+				emission("SERRER:"+couple);
+				
+			}
+			if (action == MotionEvent.ACTION_UP) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				emission("STOP:"+v.getTag().toString().substring(0, 1));
+			}
+			
+			return false;
+		}
+	};
+	
+	/**
+	 * Listener : Relache la pince du robot
+	 */
+	private OnTouchListener relacherPince = new OnTouchListener() {
+		
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
+				emission("RELACHER");
+			}
+			if (action == MotionEvent.ACTION_UP) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+			}
+			return false;
+		}
+	};
+	
+	/**
+	 * Listener : Fait bouger le Robot
+	 */
+	private OnTouchListener mouvementNegatif = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			int action = event.getAction();
 
 			if (action == MotionEvent.ACTION_DOWN) {
-
-				v.setBackgroundColor(getResources().getColor(
-						R.color.MyButtonHover));
-
-				String requete = "MOVE:"
-						+ v.getTag().toString().substring(0, 1) + ":-:"
-						+ vitesse;
-
-				Log.d(LOG_TAG, "onTouch : " + requete);
-				emission(requete);
+				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
+				emission("MOVE:"+v.getTag().toString().substring(0, 1)+":-:"+vitesse);
 
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				v.setFocusable(false);
+				//v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				String requete = "STOP:"
 						+ v.getTag().toString().substring(0, 1);
@@ -136,27 +171,13 @@ public class Telecommande extends Activity implements
 		}
 	};
 
-	private OnTouchListener positif = new OnTouchListener() {
+	private OnTouchListener mouvementPositif = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			int action = event.getAction();
 
 			if (action == MotionEvent.ACTION_DOWN) {
-				if (v.getTag().toString().compareTo("PINCE_SERRER") == 0) {
-					String requete = "SERRER:"
-							+ v.getTag().toString().substring(0, 1) + ":-:"
-							+ couple;
-
-					Log.d(LOG_TAG, "onTouch : " + requete);
-					emission(requete);
-				}
-				else if (v.getTag().toString().compareTo("PINCE_RELACHER") == 0) {
-					String requete = "RELACHER";
-
-					Log.d(LOG_TAG, "onTouch : " + requete);
-					emission(requete);
-				} else {
 					v.setBackgroundColor(getResources().getColor(
 							R.color.MyButtonHover));
 
@@ -166,11 +187,10 @@ public class Telecommande extends Activity implements
 
 					Log.d(LOG_TAG, "onTouch : " + requete);
 					emission(requete);
-				}
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				v.setFocusable(false);
+				//v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				String requete = "STOP:"
 						+ v.getTag().toString().substring(0, 1);
@@ -242,13 +262,13 @@ public class Telecommande extends Activity implements
 				} else {
 					Log.d(LOG_TAG, "socket NULL");
 					afficherMessageToast("Erreur de connexion");
-					showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+					showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				}
 			} catch (UnknownHostException e) {
-				showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+				showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
 			} catch (IOException e) {
-				showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+				showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
 				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
 			}
 		}
@@ -274,22 +294,20 @@ public class Telecommande extends Activity implements
 		coupleSeekBar.setOnSeekBarChangeListener(this);
 		coupleSeekBar.setProgress(400);
 		
-		((Button) findViewById(R.id.BaseNegatif)).setOnTouchListener(negatif);
-		((Button) findViewById(R.id.BasePositif)).setOnTouchListener(positif);
-		((Button) findViewById(R.id.EpauleNegatif)).setOnTouchListener(negatif);
-		((Button) findViewById(R.id.EpaulePositif)).setOnTouchListener(positif);
-		((Button) findViewById(R.id.CoudeNegatif)).setOnTouchListener(negatif);
-		((Button) findViewById(R.id.CoudePositif)).setOnTouchListener(positif);
-		((Button) findViewById(R.id.TangageNegatif))
-				.setOnTouchListener(negatif);
-		((Button) findViewById(R.id.TangagePositif))
-				.setOnTouchListener(positif);
-		((Button) findViewById(R.id.RoulisNegatif)).setOnTouchListener(negatif);
-		((Button) findViewById(R.id.RoulisPositif)).setOnTouchListener(positif);
-		((Button) findViewById(R.id.SerrerPince)).setOnTouchListener(positif);
-		((Button) findViewById(R.id.RelacherPince)).setOnTouchListener(positif);
+		((Button) findViewById(R.id.BaseNegatif)).setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.BasePositif)).setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.EpauleNegatif)).setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.EpaulePositif)).setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.CoudeNegatif)).setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.CoudePositif)).setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.TangageNegatif)).setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.TangagePositif)).setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.RoulisNegatif)).setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.RoulisPositif)).setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.SerrerPince)).setOnTouchListener(serrerPince);
+		((Button) findViewById(R.id.RelacherPince)).setOnTouchListener(relacherPince);
 		// On affiche le dialog de connexion
-		showDialog(MDialog.DIALOG_CONNEXION_SOCKET);
+		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET);
 	}
 	
 	@Override
@@ -306,15 +324,13 @@ public class Telecommande extends Activity implements
 		}
 		super.onDestroy();
 	}
-
-	
 	
 	public void afficherMessageToast(String msg) {
 		Log.d(LOG_TAG, "Toast : " + msg);
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
 
-	public void showDialog(String tag) {
+	public void showDialoge(String tag) {
 		Log.d(LOG_TAG, "showDialog : " + tag);
 		mDialog.show(getFragmentManager(), tag);
 	}
@@ -361,7 +377,7 @@ public class Telecommande extends Activity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.commande_manuelle, menu);
+		getMenuInflater().inflate(R.menu.telecommande, menu);
 		return true;
 	}
 
@@ -369,15 +385,13 @@ public class Telecommande extends Activity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// This ID represents the Home or Up button. In the case of this
-			// activity, the Up button is shown. Use NavUtils to allow users
-			// to navigate up one level in the application structure. For
-			// more details, see the Navigation pattern on Android Design:
-			//
-			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
-			//
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
+		case R.id.connexion:
+			startActivity(new Intent(this, Telecommande.class));
+			return true;
+		case R.id.reset:
+			emission("RESET");
 		}
 		return super.onOptionsItemSelected(item);
 	}
