@@ -1,24 +1,55 @@
 package com.egor.hercule2000;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.app.Activity;
+import android.os.Handler;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.support.v4.app.NavUtils;
+import android.widget.Toast;
 
+@SuppressLint("HandlerLeak")
 public class Accelerometre extends Activity implements SensorEventListener {
 
 	public static final String LOG_TAG = "CM_Egor";
+
+	/**
+	 * Identifie l'action du Hundler - Affiche le dialog de connexion
+	 */
+	private static final int HANDLER_CONNEXION_SOCKET = 146113;
+
+	/**
+	 * Connexion Reseaux
+	 */
+	private Reseaux reseaux = new Reseaux();
+
+	/**
+	 * Adresse IP du PC Contrôleur
+	 */
+	private String ip;
+
+	/**
+	 * Numéro de port du PC Contrôleur
+	 */
+	private int port;
 
 	/**
 	 * Les valeurs de l'accéléromètre
@@ -29,17 +60,20 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	 * SensorManager donne accès aux capteurs de l'appareil
 	 */
 	SensorManager sensorManager;
-	
+
+	boolean appuisVerticale = false;
+	boolean appuisHorisontal = false;
+	String tag = "";
 	/**
 	 * Accéléromètre
 	 */
 	Sensor accelerometre;
-	
+
 	/**
 	 * Portée maximale du capteur
 	 */
 	float porteeMax;
-	
+
 	/**
 	 * IHM : affiche les valeurs de l'accéléromètre
 	 */
@@ -60,13 +94,80 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	 */
 	AccelerometreView accelerometreView;
 
+	/**
+	 * Le Handler (Thread spécialisé) charger de modifier le IHM
+	 */
+	private Handler handler = new Handler() {
+		@Override
+		public void handleMessage(android.os.Message msg) {
+			switch (msg.what) {
+			case HANDLER_CONNEXION_SOCKET:
+				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
+				afficherMessageToast("Connexion en cours " + ip + ":" + port);
+				reseaux.connexion(ip, port, Accelerometre.this, MDialog.DIALOG_ACTIVITY_ACCELEROMETRE);
+				break;
+			}
+		};
+	};
+
+	/**
+	 * Les dialogs
+	 */
+	private DialogFragment mDialog = new MDialog();
+
+	private OnTouchListener buttonListenerVerticale = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+
+				tag = v.getTag().toString().substring(0, 1);
+				appuisVerticale = true;
+			}
+
+			if (action == MotionEvent.ACTION_UP) {
+				// v.setFocusable(false);
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				appuisVerticale = false;
+			}
+			return true;
+		}
+	};
+
+	private OnTouchListener buttonListenerHorisontale = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+				tag = v.getTag().toString().substring(0, 1);
+				appuisHorisontal = true;
+			}
+
+			if (action == MotionEvent.ACTION_UP) {
+				// v.setFocusable(false);
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				appuisHorisontal = false;
+			}
+			return true;
+		}
+	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.accelerometre);
 		// Show the Up button in the action bar.
 		setupActionBar();
-
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// On instancie le SensorManager
 		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		// On instancie l'accelerometre
@@ -82,12 +183,30 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		yTextView = (TextView) findViewById(R.id.yTextView);
 		zTextView = (TextView) findViewById(R.id.zTextView);
 
+		// Verticale
+		((Button) findViewById(R.id.epauleButton))
+				.setOnTouchListener(buttonListenerVerticale);
+		((Button) findViewById(R.id.coudeButton))
+				.setOnTouchListener(buttonListenerVerticale);
+		((Button) findViewById(R.id.tangageButton))
+				.setOnTouchListener(buttonListenerVerticale);
+
+		// Horisontale
+		((Button) findViewById(R.id.baseButton))
+				.setOnTouchListener(buttonListenerHorisontale);
+		((Button) findViewById(R.id.roulisButton))
+				.setOnTouchListener(buttonListenerHorisontale);
+
 		AccelerationLayout = (LinearLayout) findViewById(R.id.reperAccelerometreLayaout);
 		accelerometreView = new AccelerometreView(this);
-		LinearLayout.LayoutParams layoutParam = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		AccelerationLayout.addView(accelerometreView, layoutParam);
+		// LinearLayout.LayoutParams layoutParam = new
+		// LinearLayout.LayoutParams(
+		// LinearLayout.LayoutParams.WRAP_CONTENT,
+		// LinearLayout.LayoutParams.WRAP_CONTENT);
+		AccelerationLayout.addView(accelerometreView /* , layoutParam */);
+
+		// On affiche le dialog de connexion
+		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
 	}
 
 	@Override
@@ -111,7 +230,18 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	@Override
 	protected void onDestroy() {
 		sensorManager.unregisterListener(this, accelerometre);
+		reseaux.close();
 		super.onDestroy();
+	}
+
+	public void afficherMessageToast(String msg) {
+		Log.d(LOG_TAG, "Toast : " + msg);
+		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+	}
+
+	public void showDialoge(String tag) {
+		Log.d(LOG_TAG, "showDialog : " + tag);
+		mDialog.show(getFragmentManager(), tag);
 	}
 
 	@Override
@@ -158,79 +288,104 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	private boolean yeg = false;
 	private boolean yegf = false;
 
-	public void setAxes(float x, float y, float z) {
-		// fin gauche
-		if ((x < 100)) {
-			if (xedf == false) {
-				Log.d(LOG_TAG, "STOP:Ouest");
-				xedf = true;
-			}
-			xed = false;
-		}
-		// debut gauche
-		if (x > 100) {
-			if (xed == false) {
-				Log.d(LOG_TAG, "Ouest");
-				xed = true;
-			}
-			xedf = false;
-		}
+	public void setAxes(float x, float y, float z, int declencheurX,
+			int declencheurY) {
 
-		// debut droite
-		if (x < -100) {
-			if (xeg == false) {
-				Log.d(LOG_TAG, "Est");
-				xeg = true;
+		if (appuisVerticale) {
+			// fin gauche
+			if ((y < declencheurY)) {
+				if (yedf == false) {
+					Log.d(LOG_TAG, "STOP:Sud");
+					reseaux.emission("STOP:Sud");
+					yedf = true;
+				}
+				yed = false;
 			}
-			xegf = false;
-		}
+			// debut gauche
+			if (y > declencheurY) {
+				if (yed == false) {
+					Log.d(LOG_TAG, "Sud");
+					reseaux.emission("MOVE:" + tag + ":-:"+25);
+					yed = true;
+				}
+				yedf = false;
+			}
 
-		if ((x > -100)) {
-			if (xegf == false) {
-				Log.d(LOG_TAG, "STOP:Est");
-				xegf = true;
+			// debut droite
+			if (y < -declencheurY) {
+				if (yeg == false) {
+					Log.d(LOG_TAG, "Nord");
+					reseaux.emission("MOVE:" + tag + ":+:"+25);
+					yeg = true;
+				}
+				yegf = false;
 			}
-			xeg = false;
-		}
 
-		// YYYY
-		// fin gauche
-		if ((y < 100)) {
-			if (yedf == false) {
-				Log.d(LOG_TAG, "STOP:Nord");
-				yedf = true;
+			if ((y > -declencheurY)) {
+				if (yegf == false) {
+					Log.d(LOG_TAG, "STOP:Nord");
+					reseaux.emission("STOP:Nord");
+					yegf = true;
+				}
+				yeg = false;
 			}
-			yed = false;
 		}
-		// debut gauche
-		if (y > 100) {
-			if (yed == false) {
-				Log.d(LOG_TAG, "Nord");
-				yed = true;
+		if (appuisHorisontal) {
+			// fin gauche
+			if ((x < declencheurX)) {
+				if (xedf == false) {
+					Log.d(LOG_TAG, "STOP:Ouest");
+					reseaux.emission("STOP:Ouest");
+					xedf = true;
+				}
+				xed = false;
 			}
-			yedf = false;
-		}
+			// debut gauche
+			if (x > declencheurX) {
+				if (xed == false) {
+					Log.d(LOG_TAG, "Ouest");
+					reseaux.emission("MOVE:" + tag + ":-:"+25);
+					xed = true;
+				}
+				xedf = false;
+			}
 
-		// debut droite
-		if (y < -100) {
-			if (yeg == false) {
-				Log.d(LOG_TAG, "Sud");
-				yeg = true;
+			// debut droite
+			if (x < -declencheurX) {
+				if (xeg == false) {
+					Log.d(LOG_TAG, "Est");
+					reseaux.emission("MOVE:" + tag + ":+:"+25);
+					xeg = true;
+				}
+				xegf = false;
 			}
-			yegf = false;
-		}
 
-		if ((y > -100)) {
-			if (yegf == false) {
-				Log.d(LOG_TAG, "STOP:Sud");
-				yegf = true;
+			if ((x > -declencheurX)) {
+				if (xegf == false) {
+					Log.d(LOG_TAG, "STOP:Est");
+					reseaux.emission("STOP:Est");
+					xegf = true;
+				}
+				xeg = false;
 			}
-			yeg = false;
 		}
 
 		xTextView.setText("X : " + x);
 		yTextView.setText("Y : " + y);
 		zTextView.setText("Z : " + z);
+	}
+
+	public void doPositiveClick(String ip, int port) {
+		Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
+		this.ip = ip;
+		this.port = port;
+		handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
+
+	}
+
+	public void doNegativeClick() {
+		Log.d(LOG_TAG, "doNegativeClick");
+		startActivity(new Intent(this, Accueil.class));
 	}
 
 	/**
@@ -253,15 +408,13 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// This ID represents the Home or Up button. In the case of this
-			// activity, the Up button is shown. Use NavUtils to allow users
-			// to navigate up one level in the application structure. For
-			// more details, see the Navigation pattern on Android Design:
-			//
-			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
-			//
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
+		case R.id.connexion:
+			startActivity(new Intent(this, Accelerometre.class));
+			return true;
+		case R.id.reset:
+			reseaux.emission("RESET");
 		}
 		return super.onOptionsItemSelected(item);
 	}

@@ -1,12 +1,6 @@
 package com.egor.hercule2000;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
@@ -24,10 +18,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+@SuppressLint("HandlerLeak")
 public class Telecommande extends Activity implements
 		SeekBar.OnSeekBarChangeListener {
 
 	/* ----------------------- ATTRIBUTS ------------------- */
+
 	/**
 	 * Log Tag pour les messages de debuguages
 	 */
@@ -47,6 +43,11 @@ public class Telecommande extends Activity implements
 	 * Identifie l'action du Hundler - Test
 	 */
 	private static final int HANDLER_SEEK_BAR_CHANGED_COUPLE = 0003;
+
+	/**
+	 * Les dialogs
+	 */
+	private DialogFragment mDialog = new MDialog();
 
 	/**
 	 * IHM : Affiche la vitesse de deplacement du robot
@@ -79,19 +80,9 @@ public class Telecommande extends Activity implements
 	private int couple = 511;
 
 	/**
-	 * Socket pour envoyer les commandes
+	 * Connexion Reseaux
 	 */
-	private Socket socket = null;
-
-	/**
-	 * Le flux d'envoi des requêtes
-	 */
-	private PrintWriter emetteur = null;
-
-	/**
-	 * Le flux de réception des données
-	 */
-	private BufferedReader recepteur = null;
+	private Reseaux reseaux = new Reseaux();
 
 	/**
 	 * Adresse IP du PC Contrôleur
@@ -102,110 +93,6 @@ public class Telecommande extends Activity implements
 	 * Numéro de port du PC Contrôleur
 	 */
 	private int port;
-	
-	/**
-	 * Listener : Serre la pince du robot
-	 */
-	private OnTouchListener serrerPince = new OnTouchListener() {
-		
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
-				emission("SERRER:"+couple);
-				
-			}
-			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				emission("STOP:"+v.getTag().toString().substring(0, 1));
-			}
-			
-			return false;
-		}
-	};
-	
-	/**
-	 * Listener : Relache la pince du robot
-	 */
-	private OnTouchListener relacherPince = new OnTouchListener() {
-		
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
-				emission("RELACHER");
-			}
-			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-			}
-			return false;
-		}
-	};
-	
-	/**
-	 * Listener : Fait bouger le Robot
-	 */
-	private OnTouchListener mouvementNegatif = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-
-			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButtonHover));
-				emission("MOVE:"+v.getTag().toString().substring(0, 1)+":-:"+vitesse);
-
-			}
-
-			if (action == MotionEvent.ACTION_UP) {
-				//v.setFocusable(false);
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				String requete = "STOP:"
-						+ v.getTag().toString().substring(0, 1);
-				Log.d(LOG_TAG, "onTouch : " + requete);
-				emission(requete);
-			}
-			return true;
-		}
-	};
-
-	private OnTouchListener mouvementPositif = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-
-			if (action == MotionEvent.ACTION_DOWN) {
-					v.setBackgroundColor(getResources().getColor(
-							R.color.MyButtonHover));
-
-					String requete = "MOVE:"
-							+ v.getTag().toString().substring(0, 1) + ":+:"
-							+ vitesse;
-
-					Log.d(LOG_TAG, "onTouch : " + requete);
-					emission(requete);
-			}
-
-			if (action == MotionEvent.ACTION_UP) {
-				//v.setFocusable(false);
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				String requete = "STOP:"
-						+ v.getTag().toString().substring(0, 1);
-
-				Log.d(LOG_TAG, "onTouch : " + requete);
-				emission(requete);
-			}
-			return true;
-		}
-	};
-
-	/**
-	 * Les dialogs
-	 */
-	private DialogFragment mDialog = new MDialog();
 
 	/**
 	 * Le Handler (Thread spécialisé) charger de modifier le IHM
@@ -217,10 +104,9 @@ public class Telecommande extends Activity implements
 			case HANDLER_CONNEXION_SOCKET:
 				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
 				afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				threadConnexionReseaux.start();
+				reseaux.connexion(ip, port, Telecommande.this, MDialog.DIALOG_ACTIVITY_TELECOMANDE);
 				break;
 			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
-				// Log.d(LOG_TAG, "HANDLER_SEEK_BAR_CHANGMENT");
 				vitesse = vitesseSeekBar.getProgress() + 1;
 				vitesseTextView.setText("Vitesse : " + vitesse);
 				break;
@@ -231,48 +117,6 @@ public class Telecommande extends Activity implements
 			}
 		};
 	};
-	/**
-	 * Thread de connexion réseaux
-	 */
-	
-	
-	
-	
-	private Thread threadConnexionReseaux = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			Log.d(LOG_TAG, "threadConnexionReseaux RUN");
-			try {
-				socket = new Socket(ip, port);
-				if (socket != null) {
-					Log.d(LOG_TAG, "socket NOT NULL");
-//					InetAddress ipDist = socket.getInetAddress();
-//					if (ipDist != null) {
-						Log.d(LOG_TAG, "ipDist NOT NULL");
-						emetteur = new PrintWriter(socket.getOutputStream(),
-								true);
-						recepteur = new BufferedReader(new InputStreamReader(
-								socket.getInputStream()));
-						emission("M");
-//					} else {
-//						Log.d(LOG_TAG, "ipDist NULL");
-//						afficherMessageToast("Erreur de connexion");
-//						showDialog(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-//					}
-				} else {
-					Log.d(LOG_TAG, "socket NULL");
-					afficherMessageToast("Erreur de connexion");
-					showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-				}
-			} catch (UnknownHostException e) {
-				showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-			} catch (IOException e) {
-				showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-			}
-		}
-	});
 
 	/* ----------------------- METHODES ---------------------- */
 
@@ -293,38 +137,42 @@ public class Telecommande extends Activity implements
 		coupleTextView = (TextView) findViewById(R.id.coupleTextView);
 		coupleSeekBar.setOnSeekBarChangeListener(this);
 		coupleSeekBar.setProgress(400);
-		
-		((Button) findViewById(R.id.BaseNegatif)).setOnTouchListener(mouvementNegatif);
-		((Button) findViewById(R.id.BasePositif)).setOnTouchListener(mouvementPositif);
-		((Button) findViewById(R.id.EpauleNegatif)).setOnTouchListener(mouvementNegatif);
-		((Button) findViewById(R.id.EpaulePositif)).setOnTouchListener(mouvementPositif);
-		((Button) findViewById(R.id.CoudeNegatif)).setOnTouchListener(mouvementNegatif);
-		((Button) findViewById(R.id.CoudePositif)).setOnTouchListener(mouvementPositif);
-		((Button) findViewById(R.id.TangageNegatif)).setOnTouchListener(mouvementNegatif);
-		((Button) findViewById(R.id.TangagePositif)).setOnTouchListener(mouvementPositif);
-		((Button) findViewById(R.id.RoulisNegatif)).setOnTouchListener(mouvementNegatif);
-		((Button) findViewById(R.id.RoulisPositif)).setOnTouchListener(mouvementPositif);
-		((Button) findViewById(R.id.SerrerPince)).setOnTouchListener(serrerPince);
-		((Button) findViewById(R.id.RelacherPince)).setOnTouchListener(relacherPince);
+
+		((Button) findViewById(R.id.BaseNegatif))
+				.setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.BasePositif))
+				.setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.EpauleNegatif))
+				.setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.EpaulePositif))
+				.setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.CoudeNegatif))
+				.setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.CoudePositif))
+				.setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.TangageNegatif))
+				.setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.TangagePositif))
+				.setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.RoulisNegatif))
+				.setOnTouchListener(mouvementNegatif);
+		((Button) findViewById(R.id.RoulisPositif))
+				.setOnTouchListener(mouvementPositif);
+		((Button) findViewById(R.id.SerrerPince))
+				.setOnTouchListener(serrerPince);
+		((Button) findViewById(R.id.RelacherPince))
+				.setOnTouchListener(relacherPince);
 		// On affiche le dialog de connexion
-		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET);
+		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		Log.d(LOG_TAG, "onDestroy");
-		if (socket != null) {
-			// On ferme le Client socket à la fermeture de l'application
-			try {
-				Log.d(LOG_TAG, "onDestroy : Socket NUT NULL");
-				socket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		reseaux.close();
 		super.onDestroy();
 	}
-	
+
 	public void afficherMessageToast(String msg) {
 		Log.d(LOG_TAG, "Toast : " + msg);
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
@@ -348,30 +196,13 @@ public class Telecommande extends Activity implements
 		startActivity(new Intent(this, Accueil.class));
 	}
 
-	public void emission(String msg) {
-		Log.d(LOG_TAG, "emission : " + msg);
-		if (socket != null) {
-			if (socket.isConnected()) {
-				emetteur.println(msg);
-				// handler.sendEmptyMessage(AUTRES);
-			} else {
-				Log.d(LOG_TAG, "Emission Erreur Socket NOT CONNECTED");
-			}
-		} else {
-			afficherMessageToast("Emission Erreur Socket NULL");
-			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
-		}
-	}
-
 	/* Menu et Navigation */
 
 	/**
 	 * Set up the {@link android.app.ActionBar}.
 	 */
 	private void setupActionBar() {
-
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-
 	}
 
 	@Override
@@ -391,12 +222,11 @@ public class Telecommande extends Activity implements
 			startActivity(new Intent(this, Telecommande.class));
 			return true;
 		case R.id.reset:
-			emission("RESET");
+			reseaux.emission("RESET");
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	
 	/**
 	 * SeekBar événement : changement de vitesse
 	 */
@@ -422,5 +252,110 @@ public class Telecommande extends Activity implements
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
 	}
+
+	/**
+	 * Listener : Serre la pince du robot
+	 */
+	private OnTouchListener serrerPince = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+				reseaux.emission("SERRER:" + couple);
+
+			}
+			if (action == MotionEvent.ACTION_UP) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				reseaux.emission("STOP:"
+						+ v.getTag().toString().substring(0, 1));
+			}
+
+			return false;
+		}
+	};
+
+	/**
+	 * Listener : Relache la pince du robot
+	 */
+	private OnTouchListener relacherPince = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+				reseaux.emission("RELACHER");
+			}
+			if (action == MotionEvent.ACTION_UP) {
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+			}
+			return false;
+		}
+	};
+
+	/**
+	 * Listener : Fait bouger le Robot
+	 */
+	private OnTouchListener mouvementNegatif = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+				reseaux.emission("MOVE:"
+						+ v.getTag().toString().substring(0, 1) + ":-:"
+						+ vitesse);
+
+			}
+
+			if (action == MotionEvent.ACTION_UP) {
+				// v.setFocusable(false);
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				String requete = "STOP:"
+						+ v.getTag().toString().substring(0, 1);
+				Log.d(LOG_TAG, "onTouch : " + requete);
+				reseaux.emission(requete);
+			}
+			return true;
+		}
+	};
+
+	private OnTouchListener mouvementPositif = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			int action = event.getAction();
+
+			if (action == MotionEvent.ACTION_DOWN) {
+				v.setBackgroundColor(getResources().getColor(
+						R.color.MyButtonHover));
+
+				String requete = "MOVE:"
+						+ v.getTag().toString().substring(0, 1) + ":+:"
+						+ vitesse;
+
+				Log.d(LOG_TAG, "onTouch : " + requete);
+				reseaux.emission(requete);
+			}
+
+			if (action == MotionEvent.ACTION_UP) {
+				// v.setFocusable(false);
+				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				String requete = "STOP:"
+						+ v.getTag().toString().substring(0, 1);
+
+				Log.d(LOG_TAG, "onTouch : " + requete);
+				reseaux.emission(requete);
+			}
+			return true;
+		}
+	};
 
 }

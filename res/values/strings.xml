@@ -7,7 +7,7 @@
     <string name="menu_connexion">Connexion</string>
     <string name="hello_world">Hello world!</string>
     <string name="adresse_ip">Adresse IP</string>
-    <string name="ip_default">192.168.0.110</string>
+    <string name="ip_default">192.168.0.28</string>
     <string name="port">Port</string>
     <string name="port_default">9999</string>
     <string name="connexion">Connexion</string>
@@ -26,6 +26,10 @@
     <string name="vitesse">Vitesse</string>
     <string name="plus">+</string>
     <string name="moin">-</string>
+    <string name="quitter">Quitter</string>
+    <string name="activer">Activer</string>
+    <string name="dialog_titre_wifi_desactiver">Wi-Fi désactivé</string>
+    <string name="dialog_message_wifi_activer">Activer le Wi-Fi ?</string>
     <string name="connexion_reseau">Connexion Reseau</string>
     <string name="title_activity_commande_manuelle">CommandeManuelle</string>
     <string name="serrer">Serrer</string>
