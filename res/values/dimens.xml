@@ -6,5 +6,7 @@
     <dimen name="margin">2dp</dimen>
     <dimen name="reper_acclerometre_width">100dp</dimen>
     <dimen name="reper_acclerometre_height">100dp</dimen>
+    <dimen name="reper_acclerometre_width_large">500dp</dimen>
+    <dimen name="reper_acclerometre_height_large">500dp</dimen>
 
 </resources>

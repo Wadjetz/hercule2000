@@ -7,11 +7,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
-public class Reseaux {
+public class Reseau {
 	/**
 	 * Log Tag pour les messages de debuguages
 	 */
@@ -42,11 +40,12 @@ public class Reseaux {
 	 * Numéro de port du PC Contrôleur
 	 */
 	private int port;
-	Telecommande telecommande = null;
-	Accelerometre accelerometre = null;
-	Activity contexte = null;
-	boolean ok = false;
-	int activity;
+	
+	/**
+	 * Indique si le socket est connecté
+	 */
+	boolean connecter = false;
+	
 	/**
 	 * Thread de connexion réseaux
 	 */
@@ -61,44 +60,37 @@ public class Reseaux {
 					emetteur = new PrintWriter(socket.getOutputStream(), true);
 					recepteur = new BufferedReader(new InputStreamReader(
 							socket.getInputStream()));
-					emission("M");
-					ok = true;
+					emission("M:1234");
+					connecter = true;
 				} else {
 					Log.d(LOG_TAG, "socket NULL");
-					ok = false;
-					error();
+					connecter = false;
 				}
 			} catch (UnknownHostException e) {
 				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-				error();
 			} catch (IOException e) {
 				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-				error();
-			}
-		}
-
-		private void error() {
-			if(telecommande != null) {
-				telecommande.showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE_ERREUR);
-			}
-			if(accelerometre != null) {
-				accelerometre.showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE_ERREUR);
 			}
 		}
 	});
 	
-	public void connexion(String ip, int port, Context context, int activity) {
+	
+	/**
+	 * Connexion réseau, instanciation du socket dans un thread
+	 * @param ip Adresse IP du destinataire
+	 * @param port Numéro de port du serveur
+	 */
+	public void connexion(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
-		if(activity == MDialog.DIALOG_ACTIVITY_TELECOMANDE) {
-			this.contexte = (Telecommande) context;
-		}
-		if(activity == MDialog.DIALOG_ACTIVITY_ACCELEROMETRE) {
-			this.contexte = (Accelerometre) context;
-		}
 		threadConnexionReseaux.start();
 	}
-
+	
+	
+	/**
+	 * Envoie les requêtes vers le réseau
+	 * @param msg La requête a envoyé
+	 */
 	public void emission(String msg) {
 		Log.d(LOG_TAG, "emission : " + msg);
 		if (socket != null) {
@@ -111,11 +103,17 @@ public class Reseaux {
 			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
 		}
 	}
-	
-	public boolean isOk() {
-		return ok;
+	/**
+	 * Indique si le socket est connecté
+	 * @return true si le socket est connecté, false s'il y a un problème
+	 */
+	public boolean isConnecter() {
+		return connecter;
 	}
 	
+	/**
+	 * Ferme le socket s'il a était créé
+	 */
 	public void close() {
 		Log.d(LOG_TAG, "reseau close");
 		if (socket != null) {

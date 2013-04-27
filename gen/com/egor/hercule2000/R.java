@@ -31,7 +31,9 @@ public final class R {
         public static final int activity_vertical_margin=0x7f050001;
         public static final int margin=0x7f050002;
         public static final int reper_acclerometre_height=0x7f050004;
+        public static final int reper_acclerometre_height_large=0x7f050006;
         public static final int reper_acclerometre_width=0x7f050003;
+        public static final int reper_acclerometre_width_large=0x7f050005;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;

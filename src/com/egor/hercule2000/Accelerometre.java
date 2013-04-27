@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 @SuppressLint("HandlerLeak")
 public class Accelerometre extends Activity implements SensorEventListener {
-
+	
 	public static final String LOG_TAG = "CM_Egor";
 
 	/**
@@ -39,7 +39,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	/**
 	 * Connexion Reseaux
 	 */
-	private Reseaux reseaux = new Reseaux();
+	private Reseau reseaux = new Reseau();
 
 	/**
 	 * Adresse IP du PC Contrôleur
@@ -82,7 +82,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	/**
 	 * Display récupère l'orientation de l'appareil
 	 */
-	Display mDisplay;
+	private Display mDisplay;
 
 	/**
 	 * IHM : Repère de l'accéléromètre
@@ -104,7 +104,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 			case HANDLER_CONNEXION_SOCKET:
 				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
 				afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				reseaux.connexion(ip, port, Accelerometre.this, MDialog.DIALOG_ACTIVITY_ACCELEROMETRE);
+				reseaux.connexion(ip, port);
 				break;
 			}
 		};
@@ -133,6 +133,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisVerticale = false;
+				reseaux.emission("STOP");
 			}
 			return true;
 		}
@@ -155,6 +156,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisHorisontal = false;
+				reseaux.emission("STOP");
 			}
 			return true;
 		}

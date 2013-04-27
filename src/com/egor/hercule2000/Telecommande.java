@@ -53,16 +53,16 @@ public class Telecommande extends Activity implements
 	 * IHM : Affiche la vitesse de deplacement du robot
 	 */
 	private TextView vitesseTextView = null;
-
-	/**
-	 * IHM : Affiche le couple de la pince
-	 */
-	private TextView coupleTextView = null;
-
+	
 	/**
 	 * IHM : Change la vitesse de deplacement du robot
 	 */
 	private SeekBar vitesseSeekBar = null;
+	
+	/**
+	 * IHM : Affiche le couple de la pince
+	 */
+	private TextView coupleTextView = null;
 
 	/**
 	 * IHM : Change le couple de la pince
@@ -82,7 +82,7 @@ public class Telecommande extends Activity implements
 	/**
 	 * Connexion Reseaux
 	 */
-	private Reseaux reseaux = new Reseaux();
+	private Reseau reseaux = new Reseau();
 
 	/**
 	 * Adresse IP du PC Contrôleur
@@ -104,7 +104,7 @@ public class Telecommande extends Activity implements
 			case HANDLER_CONNEXION_SOCKET:
 				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
 				afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				reseaux.connexion(ip, port, Telecommande.this, MDialog.DIALOG_ACTIVITY_TELECOMANDE);
+				reseaux.connexion(ip, port);
 				break;
 			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
 				vitesse = vitesseSeekBar.getProgress() + 1;
@@ -172,17 +172,28 @@ public class Telecommande extends Activity implements
 		reseaux.close();
 		super.onDestroy();
 	}
-
+	/**
+	 * Affiche un message Toast
+	 * @param msg Le message a affiché
+	 */
 	public void afficherMessageToast(String msg) {
 		Log.d(LOG_TAG, "Toast : " + msg);
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
-
+	
+	/**
+	 * Affiche le dialog
+	 * @param tag Le tag du dialog a affiché
+	 */
 	public void showDialoge(String tag) {
 		Log.d(LOG_TAG, "showDialog : " + tag);
 		mDialog.show(getFragmentManager(), tag);
 	}
-
+	/**
+	 * Méthode de callback exécuter par le click sur le bouton ok du dialogue de connexion réseau
+	 * @param ip Adresse IP du destinataire
+	 * @param port Numéro de port du serveur
+	 */
 	public void doPositiveClick(String ip, int port) {
 		Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
 		this.ip = ip;
@@ -190,7 +201,10 @@ public class Telecommande extends Activity implements
 		handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
 
 	}
-
+	
+	/**
+	 * Méthode de callback exécuter par le click sur le bouton Annulé du dialogue
+	 */
 	public void doNegativeClick() {
 		Log.d(LOG_TAG, "doNegativeClick");
 		startActivity(new Intent(this, Accueil.class));
@@ -271,6 +285,8 @@ public class Telecommande extends Activity implements
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				reseaux.emission("STOP:"
 						+ v.getTag().toString().substring(0, 1));
+				reseaux.emission("STOP:"
+						+ v.getTag().toString().substring(0, 1));
 			}
 
 			return false;
@@ -322,11 +338,16 @@ public class Telecommande extends Activity implements
 						+ v.getTag().toString().substring(0, 1);
 				Log.d(LOG_TAG, "onTouch : " + requete);
 				reseaux.emission(requete);
+				reseaux.emission(requete);
 			}
 			return true;
 		}
 	};
-
+	
+	
+	/**
+	 * Listener : Gere les boutons plus(+) de la télécommande
+	 */
 	private OnTouchListener mouvementPositif = new OnTouchListener() {
 
 		@Override
@@ -352,6 +373,7 @@ public class Telecommande extends Activity implements
 						+ v.getTag().toString().substring(0, 1);
 
 				Log.d(LOG_TAG, "onTouch : " + requete);
+				reseaux.emission(requete);
 				reseaux.emission(requete);
 			}
 			return true;
