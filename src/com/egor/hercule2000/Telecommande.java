@@ -1,7 +1,5 @@
 package com.egor.hercule2000;
 
-import java.util.ArrayList;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,11 +18,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class Telecommande extends MyActivity {
-	long t0;
-	long delais = 0;
-	ArrayList<Pair<String, Long>> al = new ArrayList<Pair<String, Long>>();
-	String requete;
-	boolean capture = false;
 	
 	/* ----------------------- METHODES ---------------------- */
 
@@ -134,7 +127,7 @@ public class Telecommande extends MyActivity {
 			int action = event.getAction();
 
 			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.gauche_rouge)));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.droite_rouge)));
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1)+":-:" + vitesse;
 				emission(requete);
@@ -173,7 +166,7 @@ public class Telecommande extends MyActivity {
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.droite_vert)));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.gauche_vert)));
 				long current = System.currentTimeMillis();
 				delais = current - t0;
 				if (capture) {

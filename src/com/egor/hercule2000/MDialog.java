@@ -56,7 +56,7 @@ public class MDialog extends DialogFragment {
 							String ip = ip_dialog.getText().toString();
 							int port = Integer.parseInt(port_dialog.getText()
 									.toString());
-							((Telecommande) getActivity()).doPositiveClick(ip,
+							((MyActivity) getActivity()).doPositiveClick(ip,
 									port);
 						}
 					});
@@ -65,7 +65,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// User cancelled the dialog
-							((Telecommande) getActivity()).doNegativeClick();
+							((MyActivity) getActivity()).doNegativeClick();
 						}
 					});
 		}
@@ -80,7 +80,7 @@ public class MDialog extends DialogFragment {
 							// Click sur le boutton OK
 //							((MyActivity) getActivity())
 //									.afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
-							startActivity(new Intent(getActivity(), Telecommande.class));
+							startActivity(new Intent(getActivity(), Accueil.class));
 						}
 					});
 		}

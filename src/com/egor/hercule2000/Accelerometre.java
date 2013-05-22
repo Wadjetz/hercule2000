@@ -1,6 +1,7 @@
 package com.egor.hercule2000;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
@@ -183,6 +184,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		AccelerationLayout.addView(accelerometreView /* , layoutParam */);
 
 		// On affiche le dialog de connexion
+		progressDialog = new ProgressDialog(this);
 		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
 	}
 

@@ -4,10 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -15,6 +14,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -26,7 +26,13 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	/* ----------------------------------------------------- */
 	/* ----------------------- ATTRIBUTS ------------------- */
 	/* ----------------------------------------------------- */
-	protected ProgressDialog progressDialog;
+	protected long t0;
+	protected long delais = 0;
+	protected ArrayList<Pair<String, Long>> al = new ArrayList<Pair<String, Long>>();
+	protected String requete;
+	protected boolean capture = false;
+	
+	protected ProgressDialog progressDialog = null;
 	/**
 	 * Log Tag pour les messages de debuguages
 	 */
@@ -125,8 +131,34 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			switch (msg.what) {
 			case HANDLER_CONNEXION_SOCKET:
 				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
-				//afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				connexion();
+				//progressDialog = null;
+				// On ajoute un message à notre progress dialog
+				progressDialog.setMessage("Connexion en cours");
+				// On affiche notre message
+				progressDialog.show();
+				// Empeche l'interuption du dialog
+				progressDialog.setCanceledOnTouchOutside(false);
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+						socketAddress = new InetSocketAddress(ip, port);
+						try {
+							socket.connect(socketAddress, 2000);
+							  if(socket.isConnected()){
+								  emetteur = new PrintWriter(socket.getOutputStream(), true);
+								  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+								  emission("T:1234");
+							  }
+						} catch (IOException e) {
+							Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+							progressDialog.dismiss();
+							afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+						}
+						progressDialog.dismiss();
+						
+					}}).start();
 				break;
 			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
 				vitesse = vitesseSeekBar.getProgress() + 1;
@@ -151,15 +183,20 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				emission("P:" + couple);
-
+				t0 = System.currentTimeMillis();
+				requete = "P:" + couple;
+				emission(requete);
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				emission("S:"
-						+ v.getTag().toString().substring(0, 1));
-				emission("S:"
-						+ v.getTag().toString().substring(0, 1));
+				long current = System.currentTimeMillis();
+				delais = current - t0;
+				if (capture) {
+					al.add(new Pair<String, Long>(requete, delais));
+				}
+				emission("S:" + v.getTag().toString().substring(0, 1));
+				
+				
 			}
 
 			return false;
@@ -177,44 +214,20 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				emission("P:-");
+				
+				requete = "P:-";
+				emission(requete);
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				if (capture) {
+					al.add(new Pair<String, Long>(requete, (long)1500));
+				}
+				emission("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return false;
 		}
 	};
-	
-	
-	private Thread threadConnexionReseaux = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			Log.d(LOG_TAG, "threadConnexionReseaux RUN");
-			try {
-				socket = new Socket(ip, port);
-				if (socket != null) {
-					Log.d(LOG_TAG, "socket NOT NULL");
-					emetteur = new PrintWriter(socket.getOutputStream(), true);
-					recepteur = new BufferedReader(new InputStreamReader(
-							socket.getInputStream()));
-					emission("M:1234");
-				} else {
-					Log.d(LOG_TAG, "socket NULL");
-				}
-			} catch (UnknownHostException e) {
-				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-				progressDialog.dismiss();
-				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-			} catch (IOException e) {
-				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-				progressDialog.dismiss();
-				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-			}
-			progressDialog.dismiss();
-		}
-	});
-	
 	
 	/* ----------------------------------------------------- */
 	/* ---------------------- METHODES --------------------- */
@@ -222,58 +235,9 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	
 	/**
 	 * Connexion réseau, instanciation du socket dans un thread
-	 * @param ip Adresse IP du destinataire
-	 * @param port Numéro de port du serveur
 	 */
 	public void connexion() {
-		// On ajoute un message à notre progress dialog
-		progressDialog.setMessage("Connexion en cours");
-		// On affiche notre message
-		progressDialog.show();
 		
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Log.d(LOG_TAG, "threadConnexionReseaux RUN");
-				socketAddress = new InetSocketAddress(ip, port);
-				try {
-					socket.connect(socketAddress, 2000);
-					  if(socket.isConnected()){
-						  emetteur = new PrintWriter(socket.getOutputStream(), true);
-						  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-						  emission("T:1234");
-					  }
-				} catch (IOException e) {
-					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-					progressDialog.dismiss();
-					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-				}
-				/*try {
-					
-					socket.connect(socketAddress, 2000);
-					if (socket != null) {
-						Log.d(LOG_TAG, "socket NOT NULL");
-						emetteur = new PrintWriter(socket.getOutputStream(), true);
-						recepteur = new BufferedReader(new InputStreamReader(
-								socket.getInputStream()));
-						emission("T:1234");
-					} else {
-						Log.d(LOG_TAG, "socket NULL");
-					}
-				} catch (UnknownHostException e) {
-					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-					progressDialog.dismiss();
-					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE_ERREUR);
-				} catch (IOException e) {
-					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-					progressDialog.dismiss();
-					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE_ERREUR);
-				}*/
-				progressDialog.dismiss();
-				
-			}}).start();
-		//threadConnexionReseaux.start();
 	}
 	
 	/**
