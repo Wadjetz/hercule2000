@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
 	
@@ -184,7 +186,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
 				t0 = System.currentTimeMillis();
-				requete = "P:" + couple;
+				requete = "P:+:" + couple;
 				emission(requete);
 			}
 			if (action == MotionEvent.ACTION_UP) {
@@ -255,6 +257,38 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 		} else {
 			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
 		}
+	}
+	
+	public String reception() {
+		byte[] buffer = new byte[1024];
+		int readBytes = 0;
+		Log.d(LOG_TAG, "reception : ");
+		if (socket != null) {
+			if (socket.isConnected()) {
+				try {
+					// Réception d'une chaine
+			        buffer = new byte[1024];
+			        readBytes = socket.getInputStream().read(buffer, 0, 1024);
+				
+					String s = recepteur.readLine();
+					Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				Log.d(LOG_TAG, "Emission Erreur Socket NOT CONNECTED");
+			}
+		} else {
+			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
+		}
+		try {
+			return new String(buffer, 0, readBytes, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**
