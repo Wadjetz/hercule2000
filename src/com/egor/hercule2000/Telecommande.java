@@ -75,12 +75,12 @@ public class Telecommande extends MyActivity {
 
 		this.ihm();
 		// On affiche le dialog de connexion
-		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
 	}
 
 	@Override
 	protected void onDestroy() {
-		reseaux.close();
+		close();
 		super.onDestroy();
 	}
 
@@ -110,7 +110,7 @@ public class Telecommande extends MyActivity {
 			startActivity(new Intent(this, Telecommande.class));
 			return true;
 		case R.id.reset:
-			reseaux.emission("RESET");
+			emission("RESET");
 		case R.id.capturer:
 			capture = true;
 			return true;
@@ -134,23 +134,22 @@ public class Telecommande extends MyActivity {
 			int action = event.getAction();
 
 			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(
-						R.color.MyButtonHover));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.gauche_rouge)));
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1)+":-:" + vitesse;
-				reseaux.emission(requete);
+				emission(requete);
 
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.droite_vert)));
 				long current = System.currentTimeMillis();
 				delais = current - t0;
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
 				Log.d(LOG_TAG, "delais : " + delais);
-				reseaux.emission("S:" + v.getTag().toString().substring(0, 1));
+				emission("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
@@ -166,22 +165,21 @@ public class Telecommande extends MyActivity {
 			int action = event.getAction();
 
 			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(
-						R.color.MyButtonHover));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.gauche_rouge)));
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1) + ":+:" + vitesse;
-				reseaux.emission(requete);
+				emission(requete);
 
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
+				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.droite_vert)));
 				long current = System.currentTimeMillis();
 				delais = current - t0;
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
-				reseaux.emission("S:" + v.getTag().toString().substring(0, 1));
+				emission("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
@@ -201,8 +199,6 @@ public class Telecommande extends MyActivity {
 		}
 	}
 
-	private ProgressDialog progressDialog;
-
 	public void lancerCapture(View view) {
 		if (capture != true) {
 
@@ -215,7 +211,7 @@ public class Telecommande extends MyActivity {
 
 				@Override
 				public void run() {
-					reseaux.emission("R");
+					emission("R");
 					try {
 						Thread.sleep(3000);
 					} catch (InterruptedException e1) {
@@ -226,9 +222,9 @@ public class Telecommande extends MyActivity {
 						Pair<String, Long> p = al.get(i);
 						Log.d(LOG_TAG, p.first + ":" + p.second);
 						try {
-							reseaux.emission(p.first);
+							emission(p.first);
 							Thread.sleep(p.second);
-							reseaux.emission("S");
+							emission("S");
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block

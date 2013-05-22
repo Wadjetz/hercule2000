@@ -87,7 +87,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisVerticale = false;
-				reseaux.emission("STOP");
+				emission("S");
 			}
 			return true;
 		}
@@ -110,7 +110,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisHorisontal = false;
-				reseaux.emission("STOP");
+				emission("S");
 			}
 			return true;
 		}
@@ -183,7 +183,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		AccelerationLayout.addView(accelerometreView /* , layoutParam */);
 
 		// On affiche le dialog de connexion
-		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 	@Override
 	protected void onDestroy() {
 		sensorManager.unregisterListener(this, accelerometre);
-		reseaux.close();
+		close();
 		super.onDestroy();
 	}
 
@@ -263,7 +263,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if ((y < declencheurY)) {
 				if (VerticalDroiteFin == false) {
 					Log.d(LOG_TAG, "STOP:Sud");
-					reseaux.emission("STOP:Sud");
+					emission("S:Sud");
 					VerticalDroiteFin = true;
 				}
 				VerticalDroite = false;
@@ -272,7 +272,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if (y > declencheurY) {
 				if (VerticalDroite == false) {
 					Log.d(LOG_TAG, "Sud");
-					reseaux.emission("MOVE:" + tag + ":-:" + 25);
+					emission("M:" + tag + ":-:" + 25);
 					VerticalDroite = true;
 				}
 				VerticalDroiteFin = false;
@@ -282,7 +282,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if (y < -declencheurY) {
 				if (VerticalGauche == false) {
 					Log.d(LOG_TAG, "Nord");
-					reseaux.emission("MOVE:" + tag + ":+:" + 25);
+					emission("M:" + tag + ":+:" + 25);
 					VerticalGauche = true;
 				}
 				VerticalGaucheFin = false;
@@ -291,7 +291,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if ((y > -declencheurY)) {
 				if (VerticalGaucheFin == false) {
 					Log.d(LOG_TAG, "STOP:Nord");
-					reseaux.emission("STOP:Nord");
+					emission("S:Nord");
 					VerticalGaucheFin = true;
 				}
 				VerticalGauche = false;
@@ -301,17 +301,15 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// fin gauche
 			if ((x < declencheurX)) {
 				if (HorisontalDroiteFin == false) {
-					Log.d(LOG_TAG, "STOP:Ouest");
-					reseaux.emission("STOP:Ouest");
+					emission("S:Ouest");
 					HorisontalDroiteFin = true;
 				}
 				HorisontalDroite = false;
 			}
 			// debut gauche
 			if (x > declencheurX) {
-				if (HorisontalDroite == false) {
-					Log.d(LOG_TAG, "Ouest");
-					reseaux.emission("MOVE:" + tag + ":-:" + 25);
+				if (HorisontalDroite == false) {;
+					emission("M:" + tag + ":-:" + 25);
 					HorisontalDroite = true;
 				}
 				HorisontalDroiteFin = false;
@@ -320,8 +318,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut droite
 			if (x < -declencheurX) {
 				if (HorisontalGauche == false) {
-					Log.d(LOG_TAG, "Est");
-					reseaux.emission("MOVE:" + tag + ":+:" + 25);
+					emission("M:" + tag + ":+:" + 25);
 					HorisontalGauche = true;
 				}
 				HorisontalGaucheFin = false;
@@ -329,8 +326,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 			if ((x > -declencheurX)) {
 				if (HorisontalGaucheFin == false) {
-					Log.d(LOG_TAG, "STOP:Est");
-					reseaux.emission("STOP:Est");
+					emission("S:Est");
 					HorisontalGaucheFin = true;
 				}
 				HorisontalGauche = false;
@@ -368,7 +364,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			startActivity(new Intent(this, Accelerometre.class));
 			return true;
 		case R.id.reset:
-			reseaux.emission("RESET");
+			emission("R");
 		}
 		return super.onOptionsItemSelected(item);
 	}

@@ -36,12 +36,11 @@ public final class R {
         public static final int reper_acclerometre_width_large=0x7f050005;
     }
     public static final class drawable {
-        public static final int btn_custom=0x7f020000;
-        public static final int droite_rouge=0x7f020001;
-        public static final int droite_vert=0x7f020002;
-        public static final int gauche_rouge=0x7f020003;
-        public static final int gauche_vert=0x7f020004;
-        public static final int ic_launcher=0x7f020005;
+        public static final int droite_rouge=0x7f020000;
+        public static final int droite_vert=0x7f020001;
+        public static final int gauche_rouge=0x7f020002;
+        public static final int gauche_vert=0x7f020003;
+        public static final int ic_launcher=0x7f020004;
     }
     public static final class id {
         public static final int BaseNegatif=0x7f0a0014;
@@ -173,6 +172,5 @@ public final class R {
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f070001;
-        public static final int Button=0x7f070002;
     }
 }

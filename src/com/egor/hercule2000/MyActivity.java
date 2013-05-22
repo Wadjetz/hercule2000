@@ -1,8 +1,17 @@
 package com.egor.hercule2000;
 
-import android.annotation.SuppressLint;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
@@ -12,13 +21,12 @@ import android.view.View.OnTouchListener;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-@SuppressLint("HandlerLeak")
 public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
 	
 	/* ----------------------------------------------------- */
 	/* ----------------------- ATTRIBUTS ------------------- */
 	/* ----------------------------------------------------- */
-	
+	protected ProgressDialog progressDialog;
 	/**
 	 * Log Tag pour les messages de debuguages
 	 */
@@ -66,7 +74,26 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	/**
 	 * Connexion Reseaux
 	 */
-	protected Reseau reseaux = new Reseau();
+	//protected Reseau reseaux = new Reseau();
+	
+	/**
+	 * Socket pour envoyer les commandes
+	 */
+	private Socket socket = new Socket();
+	/**
+	 * Adresse du serveur
+	 */
+	InetSocketAddress socketAddress = null;
+	
+	/**
+	 * Le flux d'envoi des requêtes
+	 */
+	private PrintWriter emetteur = null;
+
+	/**
+	 * Le flux de réception des données
+	 */
+	private BufferedReader recepteur = null;
 	
 	/**
 	 * IHM : Affiche la vitesse de deplacement du robot
@@ -99,7 +126,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			case HANDLER_CONNEXION_SOCKET:
 				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
 				//afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				reseaux.connexion(ip, port, 0);
+				connexion();
 				break;
 			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
 				vitesse = vitesseSeekBar.getProgress() + 1;
@@ -124,14 +151,14 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				reseaux.emission("P:" + couple);
+				emission("P:" + couple);
 
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				reseaux.emission("S:"
+				emission("S:"
 						+ v.getTag().toString().substring(0, 1));
-				reseaux.emission("S:"
+				emission("S:"
 						+ v.getTag().toString().substring(0, 1));
 			}
 
@@ -150,7 +177,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				reseaux.emission("P:-");
+				emission("P:-");
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
@@ -159,9 +186,129 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 		}
 	};
 	
+	
+	private Thread threadConnexionReseaux = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+			try {
+				socket = new Socket(ip, port);
+				if (socket != null) {
+					Log.d(LOG_TAG, "socket NOT NULL");
+					emetteur = new PrintWriter(socket.getOutputStream(), true);
+					recepteur = new BufferedReader(new InputStreamReader(
+							socket.getInputStream()));
+					emission("M:1234");
+				} else {
+					Log.d(LOG_TAG, "socket NULL");
+				}
+			} catch (UnknownHostException e) {
+				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+				progressDialog.dismiss();
+				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+			} catch (IOException e) {
+				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+				progressDialog.dismiss();
+				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+			}
+			progressDialog.dismiss();
+		}
+	});
+	
+	
 	/* ----------------------------------------------------- */
 	/* ---------------------- METHODES --------------------- */
 	/* ----------------------------------------------------- */
+	
+	/**
+	 * Connexion réseau, instanciation du socket dans un thread
+	 * @param ip Adresse IP du destinataire
+	 * @param port Numéro de port du serveur
+	 */
+	public void connexion() {
+		// On ajoute un message à notre progress dialog
+		progressDialog.setMessage("Connexion en cours");
+		// On affiche notre message
+		progressDialog.show();
+		
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+				socketAddress = new InetSocketAddress(ip, port);
+				try {
+					socket.connect(socketAddress, 2000);
+					  if(socket.isConnected()){
+						  emetteur = new PrintWriter(socket.getOutputStream(), true);
+						  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						  emission("T:1234");
+					  }
+				} catch (IOException e) {
+					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+					progressDialog.dismiss();
+					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+				}
+				/*try {
+					
+					socket.connect(socketAddress, 2000);
+					if (socket != null) {
+						Log.d(LOG_TAG, "socket NOT NULL");
+						emetteur = new PrintWriter(socket.getOutputStream(), true);
+						recepteur = new BufferedReader(new InputStreamReader(
+								socket.getInputStream()));
+						emission("T:1234");
+					} else {
+						Log.d(LOG_TAG, "socket NULL");
+					}
+				} catch (UnknownHostException e) {
+					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+					progressDialog.dismiss();
+					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE_ERREUR);
+				} catch (IOException e) {
+					Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+					progressDialog.dismiss();
+					afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE_ERREUR);
+				}*/
+				progressDialog.dismiss();
+				
+			}}).start();
+		//threadConnexionReseaux.start();
+	}
+	
+	/**
+	 * Envoie les requêtes vers le réseau
+	 * @param msg La requête a envoyé
+	 */
+	public void emission(String msg) {
+		Log.d(LOG_TAG, "emission : " + msg);
+		if (socket != null) {
+			if (socket.isConnected()) {
+				emetteur.println(msg);
+			} else {
+				Log.d(LOG_TAG, "Emission Erreur Socket NOT CONNECTED");
+			}
+		} else {
+			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
+		}
+	}
+	
+	/**
+	 * Ferme le socket s'il a était créé
+	 */
+	public void close() {
+		Log.d(LOG_TAG, "reseau close");
+		if (socket != null) {
+			// On ferme le Client socket à la fermeture de l'application
+			try {
+				Log.d(LOG_TAG, "reseau close : Socket NOT NULL");
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	/**
 	 * Affiche le dialog

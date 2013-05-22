@@ -38,9 +38,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/base"
-            android:text="@string/moin" />
+            android:background="@drawable/droite_vert"
+            android:tag="@string/base" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -56,9 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/base"
-            android:text="@string/plus" />
+            android:background="@drawable/gauche_vert"
+            android:tag="@string/base" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -72,9 +70,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/epaule"
-            android:text="@string/moin" />
+            android:background="@drawable/droite_vert"
+            android:tag="@string/epaule" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -90,9 +87,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/epaule"
-            android:text="@string/plus" />
+            android:background="@drawable/gauche_vert"
+            android:tag="@string/epaule" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -106,9 +102,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/coude"
-            android:text="@string/moin" />
+            android:background="@drawable/droite_vert"
+            android:tag="@string/coude" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -124,9 +119,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/coude"
-            android:text="@string/plus" />
+            android:background="@drawable/gauche_vert"
+            android:tag="@string/coude" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -140,9 +134,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/tangage"
-            android:text="@string/moin" />
+            android:background="@drawable/droite_vert"
+            android:tag="@string/tangage" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -158,9 +151,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/tangage"
-            android:text="@string/plus" />
+            android:background="@drawable/gauche_vert"
+            android:tag="@string/tangage" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -174,9 +166,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
-            android:tag="@string/roulis"
-            android:text="@string/moin" />
+            android:background="@drawable/droite_vert"
+            android:tag="@string/roulis" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -192,10 +183,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@drawable/btn_custom"
-            
-            android:tag="@string/roulis"
-            android:text="@string/plus" />
+            android:background="@drawable/gauche_vert"
+            android:tag="@string/roulis" />
     </RelativeLayout>
 
     <RelativeLayout
