@@ -193,7 +193,6 @@ public class Telecommande extends MyActivity {
 	}
 
 	public void lancerCapture(View view) {
-		this.reception();
 		if (capture != true) {
 
 			// On ajoute un message à notre progress dialog
