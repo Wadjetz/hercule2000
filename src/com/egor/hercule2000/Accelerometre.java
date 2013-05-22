@@ -1,8 +1,6 @@
 package com.egor.hercule2000;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
@@ -10,7 +8,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Display;
@@ -23,33 +20,11 @@ import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 @SuppressLint("HandlerLeak")
-public class Accelerometre extends Activity implements SensorEventListener {
-	
-	public static final String LOG_TAG = "CM_Egor";
-
-	/**
-	 * Identifie l'action du Hundler - Affiche le dialog de connexion
-	 */
-	private static final int HANDLER_CONNEXION_SOCKET = 146113;
-
-	/**
-	 * Connexion Reseaux
-	 */
-	private Reseau reseaux = new Reseau();
-
-	/**
-	 * Adresse IP du PC Contrôleur
-	 */
-	private String ip;
-
-	/**
-	 * Numéro de port du PC Contrôleur
-	 */
-	private int port;
+public class Accelerometre extends MyActivity implements SensorEventListener {
 
 	/**
 	 * Les valeurs de l'accéléromètre
@@ -93,27 +68,6 @@ public class Accelerometre extends Activity implements SensorEventListener {
 	 * AccelerometreView
 	 */
 	AccelerometreView accelerometreView;
-
-	/**
-	 * Le Handler (Thread spécialisé) charger de modifier le IHM
-	 */
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case HANDLER_CONNEXION_SOCKET:
-				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
-				afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				reseaux.connexion(ip, port);
-				break;
-			}
-		};
-	};
-
-	/**
-	 * Les dialogs
-	 */
-	private DialogFragment mDialog = new MDialog();
 
 	private OnTouchListener buttonListenerVerticale = new OnTouchListener() {
 
@@ -162,6 +116,44 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		}
 	};
 
+	private void ihm() {
+		xTextView = (TextView) findViewById(R.id.xTextView);
+		yTextView = (TextView) findViewById(R.id.yTextView);
+		zTextView = (TextView) findViewById(R.id.zTextView);
+
+		vitesseTextView = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
+		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
+		vitesseSeekBar.setOnSeekBarChangeListener(this);
+		vitesseSeekBar.setProgress(vitesse);
+
+		coupleSeekBar = (SeekBar) findViewById(R.id.coupleSeekBar);
+		coupleTextView = (TextView) findViewById(R.id.coupleTextView);
+		coupleSeekBar.setOnSeekBarChangeListener(this);
+		coupleSeekBar.setProgress(400);
+
+		// Verticale
+		((Button) findViewById(R.id.epauleButton))
+				.setOnTouchListener(buttonListenerVerticale);
+		((Button) findViewById(R.id.coudeButton))
+				.setOnTouchListener(buttonListenerVerticale);
+		((Button) findViewById(R.id.tangageButton))
+				.setOnTouchListener(buttonListenerVerticale);
+
+		// Horisontale
+		((Button) findViewById(R.id.baseButton))
+				.setOnTouchListener(buttonListenerHorisontale);
+		((Button) findViewById(R.id.roulisButton))
+				.setOnTouchListener(buttonListenerHorisontale);
+
+		// Pince
+		((Button) findViewById(R.id.SerrerPince))
+				.setOnTouchListener(serrerPince);
+		((Button) findViewById(R.id.RelacherPince))
+				.setOnTouchListener(relacherPince);
+		
+		AccelerationLayout = (LinearLayout) findViewById(R.id.reperAccelerometreLayaout);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -181,25 +173,8 @@ public class Accelerometre extends Activity implements SensorEventListener {
 
 		porteeMax = accelerometre.getMaximumRange();
 
-		xTextView = (TextView) findViewById(R.id.xTextView);
-		yTextView = (TextView) findViewById(R.id.yTextView);
-		zTextView = (TextView) findViewById(R.id.zTextView);
+		this.ihm();
 
-		// Verticale
-		((Button) findViewById(R.id.epauleButton))
-				.setOnTouchListener(buttonListenerVerticale);
-		((Button) findViewById(R.id.coudeButton))
-				.setOnTouchListener(buttonListenerVerticale);
-		((Button) findViewById(R.id.tangageButton))
-				.setOnTouchListener(buttonListenerVerticale);
-
-		// Horisontale
-		((Button) findViewById(R.id.baseButton))
-				.setOnTouchListener(buttonListenerHorisontale);
-		((Button) findViewById(R.id.roulisButton))
-				.setOnTouchListener(buttonListenerHorisontale);
-
-		AccelerationLayout = (LinearLayout) findViewById(R.id.reperAccelerometreLayaout);
 		accelerometreView = new AccelerometreView(this);
 		// LinearLayout.LayoutParams layoutParam = new
 		// LinearLayout.LayoutParams(
@@ -208,7 +183,7 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		AccelerationLayout.addView(accelerometreView /* , layoutParam */);
 
 		// On affiche le dialog de connexion
-		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
 	}
 
 	@Override
@@ -234,16 +209,6 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		sensorManager.unregisterListener(this, accelerometre);
 		reseaux.close();
 		super.onDestroy();
-	}
-
-	public void afficherMessageToast(String msg) {
-		Log.d(LOG_TAG, "Toast : " + msg);
-		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-	}
-
-	public void showDialoge(String tag) {
-		Log.d(LOG_TAG, "showDialog : " + tag);
-		mDialog.show(getFragmentManager(), tag);
 	}
 
 	@Override
@@ -280,15 +245,15 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		}
 	}
 
-	private boolean xed = false;
-	private boolean xedf = false;
-	private boolean xeg = false;
-	private boolean xegf = false;
+	private boolean HorisontalDroite = false;
+	private boolean HorisontalDroiteFin = false;
+	private boolean HorisontalGauche = false;
+	private boolean HorisontalGaucheFin = false;
 
-	private boolean yed = false;
-	private boolean yedf = false;
-	private boolean yeg = false;
-	private boolean yegf = false;
+	private boolean VerticalDroite = false;
+	private boolean VerticalDroiteFin = false;
+	private boolean VerticalGauche = false;
+	private boolean VerticalGaucheFin = false;
 
 	public void setAxes(float x, float y, float z, int declencheurX,
 			int declencheurY) {
@@ -296,98 +261,85 @@ public class Accelerometre extends Activity implements SensorEventListener {
 		if (appuisVerticale) {
 			// fin gauche
 			if ((y < declencheurY)) {
-				if (yedf == false) {
+				if (VerticalDroiteFin == false) {
 					Log.d(LOG_TAG, "STOP:Sud");
 					reseaux.emission("STOP:Sud");
-					yedf = true;
+					VerticalDroiteFin = true;
 				}
-				yed = false;
+				VerticalDroite = false;
 			}
 			// debut gauche
 			if (y > declencheurY) {
-				if (yed == false) {
+				if (VerticalDroite == false) {
 					Log.d(LOG_TAG, "Sud");
-					reseaux.emission("MOVE:" + tag + ":-:"+25);
-					yed = true;
+					reseaux.emission("MOVE:" + tag + ":-:" + 25);
+					VerticalDroite = true;
 				}
-				yedf = false;
+				VerticalDroiteFin = false;
 			}
 
 			// debut droite
 			if (y < -declencheurY) {
-				if (yeg == false) {
+				if (VerticalGauche == false) {
 					Log.d(LOG_TAG, "Nord");
-					reseaux.emission("MOVE:" + tag + ":+:"+25);
-					yeg = true;
+					reseaux.emission("MOVE:" + tag + ":+:" + 25);
+					VerticalGauche = true;
 				}
-				yegf = false;
+				VerticalGaucheFin = false;
 			}
 
 			if ((y > -declencheurY)) {
-				if (yegf == false) {
+				if (VerticalGaucheFin == false) {
 					Log.d(LOG_TAG, "STOP:Nord");
 					reseaux.emission("STOP:Nord");
-					yegf = true;
+					VerticalGaucheFin = true;
 				}
-				yeg = false;
+				VerticalGauche = false;
 			}
 		}
 		if (appuisHorisontal) {
 			// fin gauche
 			if ((x < declencheurX)) {
-				if (xedf == false) {
+				if (HorisontalDroiteFin == false) {
 					Log.d(LOG_TAG, "STOP:Ouest");
 					reseaux.emission("STOP:Ouest");
-					xedf = true;
+					HorisontalDroiteFin = true;
 				}
-				xed = false;
+				HorisontalDroite = false;
 			}
 			// debut gauche
 			if (x > declencheurX) {
-				if (xed == false) {
+				if (HorisontalDroite == false) {
 					Log.d(LOG_TAG, "Ouest");
-					reseaux.emission("MOVE:" + tag + ":-:"+25);
-					xed = true;
+					reseaux.emission("MOVE:" + tag + ":-:" + 25);
+					HorisontalDroite = true;
 				}
-				xedf = false;
+				HorisontalDroiteFin = false;
 			}
 
 			// debut droite
 			if (x < -declencheurX) {
-				if (xeg == false) {
+				if (HorisontalGauche == false) {
 					Log.d(LOG_TAG, "Est");
-					reseaux.emission("MOVE:" + tag + ":+:"+25);
-					xeg = true;
+					reseaux.emission("MOVE:" + tag + ":+:" + 25);
+					HorisontalGauche = true;
 				}
-				xegf = false;
+				HorisontalGaucheFin = false;
 			}
 
 			if ((x > -declencheurX)) {
-				if (xegf == false) {
+				if (HorisontalGaucheFin == false) {
 					Log.d(LOG_TAG, "STOP:Est");
 					reseaux.emission("STOP:Est");
-					xegf = true;
+					HorisontalGaucheFin = true;
 				}
-				xeg = false;
+				HorisontalGauche = false;
 			}
 		}
 
 		xTextView.setText("X : " + x);
 		yTextView.setText("Y : " + y);
 		zTextView.setText("Z : " + z);
-	}
-
-	public void doPositiveClick(String ip, int port) {
-		Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
-		this.ip = ip;
-		this.port = port;
-		handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
-
-	}
-
-	public void doNegativeClick() {
-		Log.d(LOG_TAG, "doNegativeClick");
-		startActivity(new Intent(this, Accueil.class));
 	}
 
 	/**

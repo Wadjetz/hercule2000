@@ -1,13 +1,13 @@
 package com.egor.hercule2000;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.DialogFragment;
+import java.util.ArrayList;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -17,117 +17,18 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-@SuppressLint("HandlerLeak")
-public class Telecommande extends Activity implements
-		SeekBar.OnSeekBarChangeListener {
-
-	/* ----------------------- ATTRIBUTS ------------------- */
-
-	/**
-	 * Log Tag pour les messages de debuguages
-	 */
-	private static final String LOG_TAG = "CM_Egor";
-
-	/**
-	 * Identifie l'action du Hundler - Affiche le dialog de connexion
-	 */
-	private static final int HANDLER_CONNEXION_SOCKET = 146113;
-
-	/**
-	 * Identifie l'action du Hundler - Change la valeur de la SeekBar de vitesse
-	 */
-	private static final int HANDLER_SEEK_BAR_CHANGED_VITESSE = 614300;
-
-	/**
-	 * Identifie l'action du Hundler - Test
-	 */
-	private static final int HANDLER_SEEK_BAR_CHANGED_COUPLE = 0003;
-
-	/**
-	 * Les dialogs
-	 */
-	private DialogFragment mDialog = new MDialog();
-
-	/**
-	 * IHM : Affiche la vitesse de deplacement du robot
-	 */
-	private TextView vitesseTextView = null;
+public class Telecommande extends MyActivity {
+	long t0;
+	long delais = 0;
+	ArrayList<Pair<String, Long>> al = new ArrayList<Pair<String, Long>>();
+	String requete;
+	boolean capture = false;
 	
-	/**
-	 * IHM : Change la vitesse de deplacement du robot
-	 */
-	private SeekBar vitesseSeekBar = null;
-	
-	/**
-	 * IHM : Affiche le couple de la pince
-	 */
-	private TextView coupleTextView = null;
-
-	/**
-	 * IHM : Change le couple de la pince
-	 */
-	private SeekBar coupleSeekBar = null;
-
-	/**
-	 * Vitesse du déplacement du robot
-	 */
-	private int vitesse = 30;
-
-	/**
-	 * Couple de la pince
-	 */
-	private int couple = 511;
-
-	/**
-	 * Connexion Reseaux
-	 */
-	private Reseau reseaux = new Reseau();
-
-	/**
-	 * Adresse IP du PC Contrôleur
-	 */
-	private String ip;
-
-	/**
-	 * Numéro de port du PC Contrôleur
-	 */
-	private int port;
-
-	/**
-	 * Le Handler (Thread spécialisé) charger de modifier le IHM
-	 */
-	private Handler handler = new Handler() {
-		@Override
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case HANDLER_CONNEXION_SOCKET:
-				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
-				afficherMessageToast("Connexion en cours " + ip + ":" + port);
-				reseaux.connexion(ip, port);
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
-				vitesse = vitesseSeekBar.getProgress() + 1;
-				vitesseTextView.setText("Vitesse : " + vitesse);
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
-				couple = coupleSeekBar.getProgress() + 1;
-				coupleTextView.setText("Couple : " + couple);
-				break;
-			}
-		};
-	};
-
 	/* ----------------------- METHODES ---------------------- */
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.telecommande);
-		// Show the Up button in the action bar.
-		setupActionBar();
-		Log.d(LOG_TAG, "onCreate");
-
+	private void ihm() {
 		vitesseTextView = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
 		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
 		vitesseSeekBar.setOnSeekBarChangeListener(this);
@@ -162,52 +63,25 @@ public class Telecommande extends Activity implements
 				.setOnTouchListener(serrerPince);
 		((Button) findViewById(R.id.RelacherPince))
 				.setOnTouchListener(relacherPince);
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.telecommande);
+		// Show the Up button in the action bar.
+		setupActionBar();
+		progressDialog = new ProgressDialog(this);
+
+		this.ihm();
 		// On affiche le dialog de connexion
-		showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
 	}
 
 	@Override
 	protected void onDestroy() {
-		Log.d(LOG_TAG, "onDestroy");
 		reseaux.close();
 		super.onDestroy();
-	}
-	/**
-	 * Affiche un message Toast
-	 * @param msg Le message a affiché
-	 */
-	public void afficherMessageToast(String msg) {
-		Log.d(LOG_TAG, "Toast : " + msg);
-		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-	}
-	
-	/**
-	 * Affiche le dialog
-	 * @param tag Le tag du dialog a affiché
-	 */
-	public void showDialoge(String tag) {
-		Log.d(LOG_TAG, "showDialog : " + tag);
-		mDialog.show(getFragmentManager(), tag);
-	}
-	/**
-	 * Méthode de callback exécuter par le click sur le bouton ok du dialogue de connexion réseau
-	 * @param ip Adresse IP du destinataire
-	 * @param port Numéro de port du serveur
-	 */
-	public void doPositiveClick(String ip, int port) {
-		Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
-		this.ip = ip;
-		this.port = port;
-		handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
-
-	}
-	
-	/**
-	 * Méthode de callback exécuter par le click sur le bouton Annulé du dialogue
-	 */
-	public void doNegativeClick() {
-		Log.d(LOG_TAG, "doNegativeClick");
-		startActivity(new Intent(this, Accueil.class));
 	}
 
 	/* Menu et Navigation */
@@ -237,81 +111,18 @@ public class Telecommande extends Activity implements
 			return true;
 		case R.id.reset:
 			reseaux.emission("RESET");
+		case R.id.capturer:
+			capture = true;
+			return true;
+		case R.id.lancer:
+			for (int i = 0; i < al.size(); i++) {
+				Pair<String, Long> p = al.get(i);
+				Log.d(LOG_TAG, p.first + ":" + p.second);
+			}
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	/**
-	 * SeekBar événement : changement de vitesse
-	 */
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {
-		Log.d(LOG_TAG, "onProgressChanged SeekBar");
-		if (seekBar.getTag().toString().compareTo("VITESSE") == 0) {
-			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_VITESSE);
-		}
-		if (seekBar.getTag().toString().compareTo("COUPLE") == 0) {
-			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_COUPLE);
-		}
-
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
-	}
-
-	/**
-	 * Listener : Serre la pince du robot
-	 */
-	private OnTouchListener serrerPince = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(
-						R.color.MyButtonHover));
-				reseaux.emission("SERRER:" + couple);
-
-			}
-			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				reseaux.emission("STOP:"
-						+ v.getTag().toString().substring(0, 1));
-				reseaux.emission("STOP:"
-						+ v.getTag().toString().substring(0, 1));
-			}
-
-			return false;
-		}
-	};
-
-	/**
-	 * Listener : Relache la pince du robot
-	 */
-	private OnTouchListener relacherPince = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getAction();
-			if (action == MotionEvent.ACTION_DOWN) {
-				v.setBackgroundColor(getResources().getColor(
-						R.color.MyButtonHover));
-				reseaux.emission("RELACHER");
-			}
-			if (action == MotionEvent.ACTION_UP) {
-				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-			}
-			return false;
-		}
-	};
 
 	/**
 	 * Listener : Fait bouger le Robot
@@ -325,26 +136,26 @@ public class Telecommande extends Activity implements
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				reseaux.emission("MOVE:"
-						+ v.getTag().toString().substring(0, 1) + ":-:"
-						+ vitesse);
+				t0 = System.currentTimeMillis();
+				requete = "M:" + v.getTag().toString().substring(0, 1)+":-:" + vitesse;
+				reseaux.emission(requete);
 
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				String requete = "STOP:"
-						+ v.getTag().toString().substring(0, 1);
-				Log.d(LOG_TAG, "onTouch : " + requete);
-				reseaux.emission(requete);
-				reseaux.emission(requete);
+				long current = System.currentTimeMillis();
+				delais = current - t0;
+				if (capture) {
+					al.add(new Pair<String, Long>(requete, delais));
+				}
+				Log.d(LOG_TAG, "delais : " + delais);
+				reseaux.emission("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
 	};
-	
-	
+
 	/**
 	 * Listener : Gere les boutons plus(+) de la télécommande
 	 */
@@ -357,27 +168,81 @@ public class Telecommande extends Activity implements
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-
-				String requete = "MOVE:"
-						+ v.getTag().toString().substring(0, 1) + ":+:"
-						+ vitesse;
-
-				Log.d(LOG_TAG, "onTouch : " + requete);
+				t0 = System.currentTimeMillis();
+				requete = "M:" + v.getTag().toString().substring(0, 1) + ":+:" + vitesse;
 				reseaux.emission(requete);
+
 			}
 
 			if (action == MotionEvent.ACTION_UP) {
-				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
-				String requete = "STOP:"
-						+ v.getTag().toString().substring(0, 1);
-
-				Log.d(LOG_TAG, "onTouch : " + requete);
-				reseaux.emission(requete);
-				reseaux.emission(requete);
+				long current = System.currentTimeMillis();
+				delais = current - t0;
+				if (capture) {
+					al.add(new Pair<String, Long>(requete, delais));
+				}
+				reseaux.emission("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
 	};
 
+	public void onToggleClicked(View view) {
+		// Is the toggle on?
+		boolean on = ((ToggleButton) view).isChecked();
+
+		if (on) {
+			// Enable vibrate
+			capture = true;
+			Toast.makeText(this, "Capture", Toast.LENGTH_SHORT).show();
+		} else {
+			// Disable vibrate
+			capture = false;
+		}
+	}
+
+	private ProgressDialog progressDialog;
+
+	public void lancerCapture(View view) {
+		if (capture != true) {
+
+			// On ajoute un message à notre progress dialog
+			progressDialog.setMessage("Execution en cours");
+			// On affiche notre message
+			progressDialog.show();
+
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					reseaux.emission("R");
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					for (int i = 0; i < al.size(); i++) {
+						Pair<String, Long> p = al.get(i);
+						Log.d(LOG_TAG, p.first + ":" + p.second);
+						try {
+							reseaux.emission(p.first);
+							Thread.sleep(p.second);
+							reseaux.emission("S");
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					// A la fin du traitement, on fait disparaitre notre message
+					progressDialog.dismiss();
+				}
+
+			}).start();
+		}
+		else {
+			Toast.makeText(this, "Arreter la capture", Toast.LENGTH_SHORT).show();	
+		}
+	}
 }

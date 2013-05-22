@@ -34,6 +34,29 @@
     </LinearLayout>
 
     <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
+
+        <TextView
+            android:id="@+id/txv_vitesse_commande_manuelle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/vitesse" />
+    </RelativeLayout>
+
+    <SeekBar
+        android:id="@+id/seekBarVitesse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:max="29"
+        android:tag="VITESSE" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
@@ -107,7 +130,57 @@
             android:background="@color/pince"
             android:orientation="vertical" >
         </LinearLayout>
+    </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/SerrerPince"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/MyButton"
+            android:tag="@string/pince_serrer"
+            android:text="@string/serrer" />
+
+        <Button
+            android:id="@+id/RelacherPince"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/MyButton"
+            android:tag="@string/pince_relacher"
+            android:text="@string/relacher" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin" >
+
+        <TextView
+            android:id="@+id/coupleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/pince" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <SeekBar
+            android:id="@+id/coupleSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin"
+            android:max="510"
+            android:tag="COUPLE" />
     </RelativeLayout>
 
 </LinearLayout>

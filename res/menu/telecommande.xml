@@ -11,5 +11,16 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/reset"/>
+    
+    <item
+        android:id="@+id/capturer"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/capturer_mouvements"/>
+    <item
+        android:id="@+id/lancer"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/lancer_capture"/>
 
 </menu>

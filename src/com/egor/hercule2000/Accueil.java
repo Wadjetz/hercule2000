@@ -12,7 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class Accueil extends Activity {
-	public static final String LOG_TAG = "CM_Egor";
+	public static final String LOG_TAG = "Egor";
 	WifiManager wifiManager = null;
 	private ListView listeVue = null;
 	/**

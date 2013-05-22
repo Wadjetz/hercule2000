@@ -86,7 +86,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// Click sur le boutton OK
-							((Telecommande) getActivity()).showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
+							((Telecommande) getActivity()).afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_TELECOMMANDE);
 						}
 					});
 		}
@@ -135,7 +135,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// Click sur le boutton OK
-							((Accelerometre) getActivity()).showDialoge(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
+							((Accelerometre) getActivity()).afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACCELEROMETRE);
 						}
 					});
 		}

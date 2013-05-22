@@ -15,6 +15,15 @@ public class Reseau {
 	 */
 	private static final String LOG_TAG = "CM_Egor";
 	
+	public static final int TELECOMMANDE = 1212121;
+	public static final int ACCELEROMETRE = 6534567;
+	
+	/**
+	 * le contexte
+	 */
+	private Accelerometre contexteAccelerometre;
+	private Telecommande contexteTelecommande;
+	
 	/**
 	 * Socket pour envoyer les commandes
 	 */
@@ -80,7 +89,7 @@ public class Reseau {
 	 * @param ip Adresse IP du destinataire
 	 * @param port Numéro de port du serveur
 	 */
-	public void connexion(String ip, int port) {
+	public void connexion(String ip, int port, int contexte) {
 		this.ip = ip;
 		this.port = port;
 		threadConnexionReseaux.start();

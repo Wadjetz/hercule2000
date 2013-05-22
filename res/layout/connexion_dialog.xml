@@ -29,5 +29,17 @@
         android:layout_height="wrap_content"
         android:inputType="number"
         android:text="@string/port_default" />
+<!-- 
+    <TextView
+        android:id="@+id/txw_password_connexion_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/password" />
 
+    <EditText
+        android:id="@+id/edt_password_connexion_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword" />
+-->
 </LinearLayout>

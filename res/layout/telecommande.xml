@@ -17,15 +17,15 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/vitesse" />
-    </RelativeLayout>
 
-    <SeekBar
-        android:id="@+id/seekBarVitesse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin"
-        android:max="29"
-        android:tag="VITESSE" />
+        <SeekBar
+            android:id="@+id/seekBarVitesse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin"
+            android:max="29"
+            android:tag="VITESSE" />
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -192,7 +192,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@color/MyButton"
+            android:background="@drawable/btn_custom"
+            
             android:tag="@string/roulis"
             android:text="@string/plus" />
     </RelativeLayout>
@@ -244,14 +245,37 @@
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:text="@string/pince" />
+
+        <SeekBar
+            android:id="@+id/coupleSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin"
+            android:max="510"
+            android:tag="COUPLE" />
     </RelativeLayout>
 
-    <SeekBar
-        android:id="@+id/coupleSeekBar"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin"
-        android:max="510"
-        android:tag="COUPLE" />
+        android:layout_margin="@dimen/margin" >
+
+        <ToggleButton
+            android:id="@+id/capturer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onToggleClicked"
+            android:textOff="@string/capturer_mouvements"
+            android:textOn="Arreter" />
+
+        <Button
+            android:id="@+id/lancerCapture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:onClick="lancerCapture"
+            android:text="@string/lancer_capture" />
+    </RelativeLayout>
 
 </LinearLayout>

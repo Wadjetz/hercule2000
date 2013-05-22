@@ -7,7 +7,7 @@
     <string name="menu_connexion">Connexion</string>
     <string name="hello_world">Hello world!</string>
     <string name="adresse_ip">Adresse IP</string>
-    <string name="ip_default">192.168.0.108</string>
+    <string name="ip_default">192.168.0.28</string>
     <string name="port">Port</string>
     <string name="port_default">9999</string>
     <string name="connexion">Connexion</string>
@@ -45,5 +45,8 @@
     <string name="couple">Couple</string>
     <string name="title_activity_accelerometre">Accelerometre</string>
     <string name="reset">Reset</string>
+    <string name="password">Mot de passe</string>
+    <string name="capturer_mouvements">Capturer</string>
+    <string name="lancer_capture">Lancer</string>
 
 </resources>
