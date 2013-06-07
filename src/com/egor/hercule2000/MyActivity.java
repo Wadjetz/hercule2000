@@ -28,8 +28,15 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	/* ----------------------------------------------------- */
 	/* ----------------------- ATTRIBUTS ------------------- */
 	/* ----------------------------------------------------- */
+	
 	protected long t0;
+	/**
+	 * La durer du mouvement
+	 */
 	protected long delais = 0;
+	/**
+	 * Liste où on enregistre les mouvements
+	 */
 	protected ArrayList<Pair<String, Long>> al = new ArrayList<Pair<String, Long>>();
 	protected String requete;
 	protected boolean capture = false;
@@ -124,6 +131,54 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 */
 	protected SeekBar coupleSeekBar = null;
 	
+	public class MyHandler extends Handler {
+		@Override
+		public void handleMessage(android.os.Message msg) {
+			switch (msg.what) {
+			case HANDLER_CONNEXION_SOCKET:
+				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
+				//progressDialog = null;
+				// On ajoute un message à notre progress dialog
+				progressDialog.setMessage("Connexion en cours");
+				// On affiche notre message
+				progressDialog.show();
+				// Empeche l'interuption du dialog
+				progressDialog.setCanceledOnTouchOutside(false);
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+						socketAddress = new InetSocketAddress(ip, port);
+						try {
+							socket.connect(socketAddress, 2000);
+							  if(socket.isConnected()){
+								  emetteur = new PrintWriter(socket.getOutputStream(), true);
+								  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+								  envoyer("D:1234");
+							  }
+						} catch (IOException e) {
+							Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+							progressDialog.dismiss();
+							afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+						}
+						progressDialog.dismiss();
+						
+					}}).start();
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
+				vitesse = vitesseSeekBar.getProgress() + 1;
+				vitesseTextView.setText("Vitesse : " + vitesse);
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
+				couple = coupleSeekBar.getProgress() + 1;
+				coupleTextView.setText("Couple : " + couple);
+				break;
+			}
+		};
+	}
+	
+	
 	/**
 	 * Le Handler (Thread spécialisé) charger de modifier le IHM
 	 */
@@ -151,7 +206,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 							  if(socket.isConnected()){
 								  emetteur = new PrintWriter(socket.getOutputStream(), true);
 								  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-								  emission("T:1234");
+								  envoyer("D:1234");
 							  }
 						} catch (IOException e) {
 							Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
@@ -187,7 +242,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 						R.color.MyButtonHover));
 				t0 = System.currentTimeMillis();
 				requete = "P:+:" + couple;
-				emission(requete);
+				envoyer(requete);
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
@@ -196,7 +251,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
-				emission("S:" + v.getTag().toString().substring(0, 1));
+				envoyer("S:" + v.getTag().toString().substring(0, 1));
 				
 				
 			}
@@ -217,15 +272,15 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
 				
-				requete = "P:-";
-				emission(requete);
+				requete = "P:-:0";
+				envoyer(requete);
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, (long)1500));
 				}
-				emission("S:" + v.getTag().toString().substring(0, 1));
+				envoyer("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return false;
 		}
@@ -236,17 +291,10 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	/* ----------------------------------------------------- */
 	
 	/**
-	 * Connexion réseau, instanciation du socket dans un thread
-	 */
-	public void connexion() {
-		
-	}
-	
-	/**
 	 * Envoie les requêtes vers le réseau
 	 * @param msg La requête a envoyé
 	 */
-	public void emission(String msg) {
+	public void envoyer(String msg) {
 		Log.d(LOG_TAG, "emission : " + msg);
 		if (socket != null) {
 			if (socket.isConnected()) {
@@ -258,16 +306,13 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
 		}
 	}
-	
-	public String reception() {
-		byte[] buffer = new byte[1024];
-		int readBytes = 0;
-		Log.d(LOG_TAG, "reception : ");
-		if (socket != null) {
-			if (socket.isConnected()) {
+	//Methode en cours de developpement
+	public void reception() {
+		
 				try {
+					int readBytes = 0;
 					// Réception d'une chaine
-			        buffer = new byte[1024];
+					byte[] buffer = new byte[1024];
 			        readBytes = socket.getInputStream().read(buffer, 0, 1024);
 				
 					String s = recepteur.readLine();
@@ -276,20 +321,8 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else {
-				Log.d(LOG_TAG, "Emission Erreur Socket NOT CONNECTED");
-			}
-		} else {
-			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
-		}
-		try {
-			return new String(buffer, 0, readBytes, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
 	}
+	
 	
 	/**
 	 * Ferme le socket s'il a était créé

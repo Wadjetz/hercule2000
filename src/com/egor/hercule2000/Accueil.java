@@ -13,7 +13,10 @@ import android.widget.ListView;
 
 public class Accueil extends Activity {
 	public static final String LOG_TAG = "Egor";
-	WifiManager wifiManager = null;
+	/**
+	 * L'objet qui gère le wi-fi du téléphone
+	 */
+	private WifiManager wifiManager = null;
 	private ListView listeVue = null;
 	/**
 	 * Les dialogs
@@ -24,7 +27,8 @@ public class Accueil extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.accueil);
-
+		
+		// On vérifie si le wi-fi est activé
 		wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 		if (wifiManager != null) {
 			if (wifiManager.isWifiEnabled()) {
@@ -51,9 +55,11 @@ public class Accueil extends Activity {
 					int position, long id) {
 				switch (position) {
 				case 0:
+					// Clique sur Télécommande
 					startActivity(new Intent(Accueil.this, Telecommande.class));
 					break;
 				case 1:
+					// Clique sur Accelerometre
 					startActivity(new Intent(Accueil.this, Accelerometre.class));
 					break;
 				}
@@ -61,11 +67,16 @@ public class Accueil extends Activity {
 
 		});
 	}
-
+	/**
+	 * Active le wifi
+	 */
 	public void startWifi() {
 		wifiManager.setWifiEnabled(true);
 	}
-
+	/**
+	 * Affiche le dialogue
+	 * @param tag le dialogue a afficher
+	 */
 	public void showDialoge(String tag) {
 		Log.d(LOG_TAG, "showDialog : " + tag);
 		mDialog.show(getFragmentManager(), tag);

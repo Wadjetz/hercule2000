@@ -7,7 +7,7 @@
     <string name="menu_connexion">Connexion</string>
     <string name="hello_world">Hello world!</string>
     <string name="adresse_ip">Adresse IP</string>
-    <string name="ip_default">192.168.0.28</string>
+    <string name="ip_default">192.168.0.106</string>
     <string name="port">Port</string>
     <string name="port_default">9999</string>
     <string name="connexion">Connexion</string>

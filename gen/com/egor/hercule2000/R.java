@@ -64,7 +64,6 @@ public final class R {
         public static final int edt_ip_connexion_dialog=0x7f0a0011;
         public static final int edt_port_connexion_dialog=0x7f0a0013;
         public static final int epauleButton=0x7f0a0007;
-        public static final int lancer=0x7f0a0022;
         public static final int lancerCapture=0x7f0a001f;
         public static final int listView_acceuil_commandes=0x7f0a000f;
         public static final int reperAccelerometreLayaout=0x7f0a000a;

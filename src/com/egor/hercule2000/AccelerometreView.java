@@ -2,7 +2,6 @@ package com.egor.hercule2000;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -10,7 +9,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 
-@SuppressLint("HandlerLeak")
 public class AccelerometreView extends View {
 	/* ----------------------- ATTRIBUTS ------------------- */
 	/**
@@ -37,7 +35,9 @@ public class AccelerometreView extends View {
 	 * Hauteur du canvas
 	 */
 	private int height;
-
+	/**
+	 * Centre du canvas
+	 */
 	private int xCenter;
 	private int yCenter;
 
@@ -54,16 +54,16 @@ public class AccelerometreView extends View {
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
 			// redraw();
-			invalidate();
+			invalidate(); // On redessine le dessin
 		}
 	};
-
+	
 	private Thread background;
 
-	/** * An atomic boolean to manage the external thread's destruction */
-	AtomicBoolean isRunning = new AtomicBoolean(false);
-	/** * An atomic boolean to manage the external thread's destruction */
-	AtomicBoolean isPausing = new AtomicBoolean(false);
+	/** * Un booléen atomique pour gérer la destruction du thread extérieur */
+	public AtomicBoolean isRunning = new AtomicBoolean(false);
+	/** * Un booléen atomique pour gérer la destruction du thread extérieur */
+	public AtomicBoolean isPausing = new AtomicBoolean(false);
 
 	public AccelerometreView(Context context) {
 		super(context);
@@ -75,13 +75,13 @@ public class AccelerometreView extends View {
 			 */
 			Message myMessage;
 
-			// Overriden Run method
 			public void run() {
 				try {
 					while (isRunning.get()) {
 						if (isPausing.get()) {
 							Thread.sleep(2000);
 						} else {
+							// On redessine 30 fois par seconde
 							Thread.sleep(1000 / 30);
 							myMessage = redessiner.obtainMessage();
 							redessiner.sendMessage(myMessage);
@@ -93,10 +93,9 @@ public class AccelerometreView extends View {
 			}
 		});
 
-		// Initialize the threadSafe booleans
 		isRunning.set(true);
 		isPausing.set(false);
-		// and start it
+
 		background.start();
 
 	}
@@ -123,7 +122,7 @@ public class AccelerometreView extends View {
 		dessinerCercleNeutre();
 
 		dessinerLignesDiagonale();
-		dessinerCerclePointAccelerometre(maxRayon, activity.aX, activity.aY);
+		dessinerCerclePointAccelerometre(maxRayon, activity.getaX(), activity.getaY());
 	}
 
 	private void dessinerCercleLimite() {
@@ -149,10 +148,10 @@ public class AccelerometreView extends View {
 
 	private void dessinerCerclePointAccelerometre(int maxRayon, float x, float y) {
 		// Calcule des coordonée a afficher
-		float xToDisp = (activity.aX * maxRayon) / activity.porteeMax;
-		float yToDisp = (activity.aY * maxRayon) / activity.porteeMax;
-		float zToDisp = (activity.aZ * maxRayon) / activity.porteeMax;
-		activity.setAxes(xToDisp, yToDisp, zToDisp, xCenter / 4, yCenter / 4);
+		float xToDisp = (activity.getaX() * maxRayon) / activity.getPorteeMax();
+		float yToDisp = (activity.getaY() * maxRayon) / activity.getPorteeMax();
+		float zToDisp = (activity.getaZ() * maxRayon) / activity.getPorteeMax();
+		activity.calculeRequete(xToDisp, yToDisp, zToDisp, xCenter / 4, yCenter / 4);
 
 		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 15, paint);
 		paint.setARGB(255, 255, 255, 255);

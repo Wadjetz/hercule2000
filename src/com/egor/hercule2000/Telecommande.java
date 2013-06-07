@@ -20,7 +20,9 @@ import android.widget.ToggleButton;
 public class Telecommande extends MyActivity {
 	
 	/* ----------------------- METHODES ---------------------- */
-
+	/**
+	 * Initialisation de l'IHM
+	 */
 	private void ihm() {
 		vitesseTextView = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
 		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
@@ -73,6 +75,7 @@ public class Telecommande extends MyActivity {
 
 	@Override
 	protected void onDestroy() {
+		// On ferme le socket
 		close();
 		super.onDestroy();
 	}
@@ -103,15 +106,7 @@ public class Telecommande extends MyActivity {
 			startActivity(new Intent(this, Telecommande.class));
 			return true;
 		case R.id.reset:
-			emission("RESET");
-		case R.id.capturer:
-			capture = true;
-			return true;
-		case R.id.lancer:
-			for (int i = 0; i < al.size(); i++) {
-				Pair<String, Long> p = al.get(i);
-				Log.d(LOG_TAG, p.first + ":" + p.second);
-			}
+			envoyer("R");
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -130,7 +125,7 @@ public class Telecommande extends MyActivity {
 				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.droite_rouge)));
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1)+":-:" + vitesse;
-				emission(requete);
+				envoyer(requete);
 
 			}
 
@@ -142,7 +137,7 @@ public class Telecommande extends MyActivity {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
 				Log.d(LOG_TAG, "delais : " + delais);
-				emission("S:" + v.getTag().toString().substring(0, 1));
+				envoyer("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
@@ -161,7 +156,7 @@ public class Telecommande extends MyActivity {
 				v.setBackgroundDrawable(getResources().getDrawable((R.drawable.gauche_rouge)));
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1) + ":+:" + vitesse;
-				emission(requete);
+				envoyer(requete);
 
 			}
 
@@ -172,7 +167,7 @@ public class Telecommande extends MyActivity {
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
-				emission("S:" + v.getTag().toString().substring(0, 1));
+				envoyer("S:" + v.getTag().toString().substring(0, 1));
 			}
 			return true;
 		}
@@ -191,7 +186,10 @@ public class Telecommande extends MyActivity {
 			capture = false;
 		}
 	}
-
+	/**
+	 * Mode automatique
+	 * @param view
+	 */
 	public void lancerCapture(View view) {
 		if (capture != true) {
 
@@ -204,7 +202,7 @@ public class Telecommande extends MyActivity {
 
 				@Override
 				public void run() {
-					emission("R");
+					envoyer("R");
 					try {
 						Thread.sleep(3000);
 					} catch (InterruptedException e1) {
@@ -215,9 +213,9 @@ public class Telecommande extends MyActivity {
 						Pair<String, Long> p = al.get(i);
 						Log.d(LOG_TAG, p.first + ":" + p.second);
 						try {
-							emission(p.first);
+							envoyer(p.first);
 							Thread.sleep(p.second);
-							emission("S");
+							envoyer("S");
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block

@@ -30,7 +30,7 @@ public class MDialog extends DialogFragment {
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-
+		// Un objet qui construit des dialogues
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		LayoutInflater factory = LayoutInflater.from(getActivity());
 
@@ -78,13 +78,11 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// Click sur le boutton OK
-//							((MyActivity) getActivity())
-//									.afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
 							startActivity(new Intent(getActivity(), Accueil.class));
 						}
 					});
 		}
-
+		// Le message pour activer le wifi
 		if (getTag().compareTo(DIALOG_WIFI_ACTIVER) == 0) {
 			// Le titre du dialog
 			builder.setTitle(R.string.dialog_titre_wifi_desactiver);
@@ -94,7 +92,7 @@ public class MDialog extends DialogFragment {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							// Click sur le boutton OK
-
+							//On active le wifi
 							((Accueil) getActivity()).startWifi();
 						}
 					});
@@ -102,13 +100,11 @@ public class MDialog extends DialogFragment {
 			builder.setNegativeButton(R.string.quitter,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							// User cancelled the dialog
+							// On quitte l'application
 							System.exit(0);
 						}
 					});
 		}
-
-		// Create the AlertDialog object and return it
 		return builder.create();
 	}
 }

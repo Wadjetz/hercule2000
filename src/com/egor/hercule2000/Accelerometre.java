@@ -1,6 +1,5 @@
 package com.egor.hercule2000;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -24,31 +23,36 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-@SuppressLint("HandlerLeak")
 public class Accelerometre extends MyActivity implements SensorEventListener {
 
 	/**
 	 * Les valeurs de l'accéléromètre
 	 */
-	float aX, aY, aZ;
+	private float aX, aY, aZ;
 
 	/**
 	 * SensorManager donne accès aux capteurs de l'appareil
 	 */
-	SensorManager sensorManager;
-
-	boolean appuisVerticale = false;
-	boolean appuisHorisontal = false;
-	String tag = "";
+	private SensorManager sensorManager;
+	/**
+	 * Indique si on veut commander avec l'axe X
+	 */
+	private boolean appuisVerticale = false;
+	/**
+	 * Indique si on veut commander avec l'axe Y
+	 */
+	private boolean appuisHorisontal = false;
+	
+	private String tag = "";
 	/**
 	 * Accéléromètre
 	 */
-	Sensor accelerometre;
+	private Sensor accelerometre;
 
 	/**
 	 * Portée maximale du capteur
 	 */
-	float porteeMax;
+	private float porteeMax;
 
 	/**
 	 * IHM : affiche les valeurs de l'accéléromètre
@@ -63,19 +67,19 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 	/**
 	 * IHM : Repère de l'accéléromètre
 	 */
-	LinearLayout AccelerationLayout;
+	private LinearLayout AccelerationLayout;
 
 	/**
 	 * AccelerometreView
 	 */
-	AccelerometreView accelerometreView;
+	private AccelerometreView accelerometreView;
 
 	private OnTouchListener buttonListenerVerticale = new OnTouchListener() {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			int action = event.getAction();
-
+			// Toucher sur le bouton
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
@@ -83,12 +87,12 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				tag = v.getTag().toString().substring(0, 1);
 				appuisVerticale = true;
 			}
-
+			// Bouton relacher
 			if (action == MotionEvent.ACTION_UP) {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisVerticale = false;
-				emission("S");
+				envoyer("S");
 			}
 			return true;
 		}
@@ -99,24 +103,26 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			int action = event.getAction();
-
+			// Toucher sur le bouton
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
 				tag = v.getTag().toString().substring(0, 1);
 				appuisHorisontal = true;
 			}
-
+			// Bouton relacher
 			if (action == MotionEvent.ACTION_UP) {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisHorisontal = false;
-				emission("S");
+				envoyer("S");
 			}
 			return true;
 		}
 	};
-
+	/**
+	 * Initialisation de l'IHM
+	 */
 	private void ihm() {
 		xTextView = (TextView) findViewById(R.id.xTextView);
 		yTextView = (TextView) findViewById(R.id.yTextView);
@@ -151,7 +157,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				.setOnTouchListener(serrerPince);
 		((Button) findViewById(R.id.RelacherPince))
 				.setOnTouchListener(relacherPince);
-		
+
 		AccelerationLayout = (LinearLayout) findViewById(R.id.reperAccelerometreLayaout);
 	}
 
@@ -161,6 +167,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		setContentView(R.layout.accelerometre);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		// On fixe l'oriantation en mode portrait
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		// setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// On instancie le SensorManager
@@ -171,7 +178,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		// and instantiate the display to know the device orientation
 		mDisplay = ((WindowManager) getSystemService(WINDOW_SERVICE))
 				.getDefaultDisplay();
-
+		// Porté maximal du capteur
 		porteeMax = accelerometre.getMaximumRange();
 
 		this.ihm();
@@ -190,24 +197,26 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 	@Override
 	protected void onResume() {
+		// On active le capteur
 		sensorManager.registerListener(this, accelerometre,
 				SensorManager.SENSOR_DELAY_UI);
+		// on arrete la pause du thread
 		accelerometreView.isPausing.set(false);
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
-		// unregister every body
+		// on désactive le capteur
 		sensorManager.unregisterListener(this, accelerometre);
-		// and don't forget to pause the thread that redraw the
-		// xyAccelerationView
+		// On met en pause le capteur
 		accelerometreView.isPausing.set(true);
 		super.onPause();
 	}
 
 	@Override
 	protected void onDestroy() {
+		// on désactive le capteur
 		sensorManager.unregisterListener(this, accelerometre);
 		close();
 		super.onDestroy();
@@ -256,8 +265,15 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 	private boolean VerticalDroiteFin = false;
 	private boolean VerticalGauche = false;
 	private boolean VerticalGaucheFin = false;
-
-	public void setAxes(float x, float y, float z, int declencheurX,
+	/**
+	 * En fonction dès valeur du capteur on envoie les requêtes
+	 * @param x Valeur de l'axe X du capteur
+	 * @param y Valeur de l'axe Y du capteur
+	 * @param z Valeur de l'axe Z du capteur
+	 * @param declencheurX Seuil de déclenchement de la requête pour l'axe X
+	 * @param declencheurY Seuil de déclenchement de la requête pour l'axe Y
+	 */
+	public void calculeRequete(float x, float y, float z, int declencheurX,
 			int declencheurY) {
 
 		if (appuisVerticale) {
@@ -265,7 +281,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if ((y < declencheurY)) {
 				if (VerticalDroiteFin == false) {
 					Log.d(LOG_TAG, "STOP:Sud");
-					emission("S:Sud");
+					envoyer("S:Sud");
 					VerticalDroiteFin = true;
 				}
 				VerticalDroite = false;
@@ -274,7 +290,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if (y > declencheurY) {
 				if (VerticalDroite == false) {
 					Log.d(LOG_TAG, "Sud");
-					emission("M:" + tag + ":-:" + 25);
+					envoyer("M:" + tag + ":-:" + 25);
 					VerticalDroite = true;
 				}
 				VerticalDroiteFin = false;
@@ -284,7 +300,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if (y < -declencheurY) {
 				if (VerticalGauche == false) {
 					Log.d(LOG_TAG, "Nord");
-					emission("M:" + tag + ":+:" + 25);
+					envoyer("M:" + tag + ":+:" + 25);
 					VerticalGauche = true;
 				}
 				VerticalGaucheFin = false;
@@ -293,7 +309,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			if ((y > -declencheurY)) {
 				if (VerticalGaucheFin == false) {
 					Log.d(LOG_TAG, "STOP:Nord");
-					emission("S:Nord");
+					envoyer("S:Nord");
 					VerticalGaucheFin = true;
 				}
 				VerticalGauche = false;
@@ -303,15 +319,16 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// fin gauche
 			if ((x < declencheurX)) {
 				if (HorisontalDroiteFin == false) {
-					emission("S:Ouest");
+					envoyer("S:Ouest");
 					HorisontalDroiteFin = true;
 				}
 				HorisontalDroite = false;
 			}
 			// debut gauche
 			if (x > declencheurX) {
-				if (HorisontalDroite == false) {;
-					emission("M:" + tag + ":-:" + 25);
+				if (HorisontalDroite == false) {
+					;
+					envoyer("M:" + tag + ":-:" + 25);
 					HorisontalDroite = true;
 				}
 				HorisontalDroiteFin = false;
@@ -320,7 +337,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut droite
 			if (x < -declencheurX) {
 				if (HorisontalGauche == false) {
-					emission("M:" + tag + ":+:" + 25);
+					envoyer("M:" + tag + ":+:" + 25);
 					HorisontalGauche = true;
 				}
 				HorisontalGaucheFin = false;
@@ -328,7 +345,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 			if ((x > -declencheurX)) {
 				if (HorisontalGaucheFin == false) {
-					emission("S:Est");
+					envoyer("S:Est");
 					HorisontalGaucheFin = true;
 				}
 				HorisontalGauche = false;
@@ -366,9 +383,25 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			startActivity(new Intent(this, Accelerometre.class));
 			return true;
 		case R.id.reset:
-			emission("R");
+			envoyer("R");
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
+	public float getaX() {
+		return aX;
+	}
+
+	public float getaY() {
+		return aY;
+	}
+
+	public float getaZ() {
+		return aZ;
+	}
+
+	public float getPorteeMax() {
+		return porteeMax;
+	}
+	
 }
