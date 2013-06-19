@@ -3,11 +3,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <ListView
-        android:id="@+id/listView_acceuil_commandes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="@string/title_activity_telecommande" />
 
-    </ListView>
+    <Button
+        android:id="@+id/accueil_accelerometre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/accelerometre"
+        android:height="150dp"
+        android:width="150dp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/accueil_accelerometre"
+        android:layout_centerHorizontal="true"
+        android:text="@string/title_activity_accelerometre" />
+
+    <Button
+        android:id="@+id/accueil_telecommande"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/telecommande"
+        android:height="150dp"
+        android:width="150dp" />
 
 </RelativeLayout>

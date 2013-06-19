@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,16 +18,30 @@ import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
-	
+public class MyActivity extends Activity{
+
 	/* ----------------------------------------------------- */
 	/* ----------------------- ATTRIBUTS ------------------- */
 	/* ----------------------------------------------------- */
-	
+
+	protected Button lancerCapture = null;
+
+	protected String recu = "";
+
+	public synchronized String getRecu() {
+		return this.recu;
+	}
+
+	public synchronized void setRecu(String recu) {
+		this.recu = recu;
+	}
+
 	protected long t0;
 	/**
 	 * La durer du mouvement
@@ -40,7 +53,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	protected ArrayList<Pair<String, Long>> al = new ArrayList<Pair<String, Long>>();
 	protected String requete;
 	protected boolean capture = false;
-	
+
 	protected ProgressDialog progressDialog = null;
 	/**
 	 * Log Tag pour les messages de debuguages
@@ -50,7 +63,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 * Identifie l'action du Hundler - Affiche le dialog de connexion
 	 */
 	protected static final int HANDLER_CONNEXION_SOCKET = 146113;
-	
+
 	/**
 	 * Identifie l'action du Hundler - Change la valeur de la SeekBar de vitesse
 	 */
@@ -60,7 +73,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 * Identifie l'action du Hundler - Test
 	 */
 	protected static final int HANDLER_SEEK_BAR_CHANGED_COUPLE = 123003;
-	
+
 	/**
 	 * Adresse IP du PC Contrôleur
 	 */
@@ -70,7 +83,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 * Numéro de port du PC Contrôleur
 	 */
 	protected int port;
-	
+
 	/**
 	 * Vitesse du déplacement du robot
 	 */
@@ -80,47 +93,51 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 * Couple de la pince
 	 */
 	protected int couple = 511;
-	
+
 	/**
 	 * Les dialogs
 	 */
 	protected DialogFragment mDialog = new MDialog();
-	
+
 	/**
 	 * Connexion Reseaux
 	 */
-	//protected Reseau reseaux = new Reseau();
-	
+	// protected Reseau reseaux = new Reseau();
+
 	/**
 	 * Socket pour envoyer les commandes
 	 */
-	private Socket socket = new Socket();
+	protected Socket socket = new Socket();
 	/**
 	 * Adresse du serveur
 	 */
-	InetSocketAddress socketAddress = null;
-	
+	protected InetSocketAddress socketAddress = null;
+
 	/**
 	 * Le flux d'envoi des requêtes
 	 */
-	private PrintWriter emetteur = null;
+	protected PrintWriter emetteur = null;
 
 	/**
 	 * Le flux de réception des données
 	 */
-	private BufferedReader recepteur = null;
-	
+	protected BufferedReader recepteur = null;
+
 	/**
 	 * IHM : Affiche la vitesse de deplacement du robot
 	 */
 	protected TextView vitesseTextView = null;
-	
-	
+
+	/**
+	 * IHM : Affiche la vitesse de deplacement du robot
+	 */
+	protected TextView messageRecu = null;
+
 	/**
 	 * IHM : Change la vitesse de deplacement du robot
 	 */
 	protected SeekBar vitesseSeekBar = null;
-	
+
 	/**
 	 * IHM : Affiche le couple de la pince
 	 */
@@ -130,105 +147,8 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 	 * IHM : Change le couple de la pince
 	 */
 	protected SeekBar coupleSeekBar = null;
-	
-	public class MyHandler extends Handler {
-		@Override
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case HANDLER_CONNEXION_SOCKET:
-				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
-				//progressDialog = null;
-				// On ajoute un message à notre progress dialog
-				progressDialog.setMessage("Connexion en cours");
-				// On affiche notre message
-				progressDialog.show();
-				// Empeche l'interuption du dialog
-				progressDialog.setCanceledOnTouchOutside(false);
-				new Thread(new Runnable() {
 
-					@Override
-					public void run() {
-						Log.d(LOG_TAG, "threadConnexionReseaux RUN");
-						socketAddress = new InetSocketAddress(ip, port);
-						try {
-							socket.connect(socketAddress, 2000);
-							  if(socket.isConnected()){
-								  emetteur = new PrintWriter(socket.getOutputStream(), true);
-								  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-								  envoyer("D:1234");
-							  }
-						} catch (IOException e) {
-							Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-							progressDialog.dismiss();
-							afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-						}
-						progressDialog.dismiss();
-						
-					}}).start();
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
-				vitesse = vitesseSeekBar.getProgress() + 1;
-				vitesseTextView.setText("Vitesse : " + vitesse);
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
-				couple = coupleSeekBar.getProgress() + 1;
-				coupleTextView.setText("Couple : " + couple);
-				break;
-			}
-		};
-	}
-	
-	
-	/**
-	 * Le Handler (Thread spécialisé) charger de modifier le IHM
-	 */
-	protected Handler handler = new Handler() {
-		@Override
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case HANDLER_CONNEXION_SOCKET:
-				Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
-				//progressDialog = null;
-				// On ajoute un message à notre progress dialog
-				progressDialog.setMessage("Connexion en cours");
-				// On affiche notre message
-				progressDialog.show();
-				// Empeche l'interuption du dialog
-				progressDialog.setCanceledOnTouchOutside(false);
-				new Thread(new Runnable() {
 
-					@Override
-					public void run() {
-						Log.d(LOG_TAG, "threadConnexionReseaux RUN");
-						socketAddress = new InetSocketAddress(ip, port);
-						try {
-							socket.connect(socketAddress, 2000);
-							  if(socket.isConnected()){
-								  emetteur = new PrintWriter(socket.getOutputStream(), true);
-								  recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-								  envoyer("D:1234");
-							  }
-						} catch (IOException e) {
-							Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
-							progressDialog.dismiss();
-							afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
-						}
-						progressDialog.dismiss();
-						
-					}}).start();
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
-				vitesse = vitesseSeekBar.getProgress() + 1;
-				vitesseTextView.setText("Vitesse : " + vitesse);
-				break;
-			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
-				couple = coupleSeekBar.getProgress() + 1;
-				coupleTextView.setText("Couple : " + couple);
-				break;
-			}
-		};
-	};
-	
 	/**
 	 * Listener : Serre la pince du robot
 	 */
@@ -243,6 +163,7 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 				t0 = System.currentTimeMillis();
 				requete = "P:+:" + couple;
 				envoyer(requete);
+//				reception();
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
@@ -252,14 +173,14 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 					al.add(new Pair<String, Long>(requete, delais));
 				}
 				envoyer("S:" + v.getTag().toString().substring(0, 1));
-				
-				
+//				reception();
+
 			}
 
 			return false;
 		}
 	};
-	
+
 	/**
 	 * Listener : Relache la pince du robot
 	 */
@@ -271,31 +192,35 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			if (action == MotionEvent.ACTION_DOWN) {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.MyButtonHover));
-				
+
 				requete = "P:-:0";
 				envoyer(requete);
+//				reception();
 			}
 			if (action == MotionEvent.ACTION_UP) {
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				if (capture) {
-					al.add(new Pair<String, Long>(requete, (long)1500));
+					al.add(new Pair<String, Long>(requete, (long) 1500));
 				}
 				envoyer("S:" + v.getTag().toString().substring(0, 1));
+//				reception();
 			}
 			return false;
 		}
 	};
-	
+
 	/* ----------------------------------------------------- */
 	/* ---------------------- METHODES --------------------- */
 	/* ----------------------------------------------------- */
-	
+
 	/**
 	 * Envoie les requêtes vers le réseau
-	 * @param msg La requête a envoyé
+	 * 
+	 * @param msg
+	 *            La requête a envoyé
 	 */
 	public void envoyer(String msg) {
-		Log.d(LOG_TAG, "emission : " + msg);
+		//Log.d(LOG_TAG, "emission : " + msg);
 		if (socket != null) {
 			if (socket.isConnected()) {
 				emetteur.println(msg);
@@ -306,24 +231,41 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			Log.d(LOG_TAG, "Emission Erreur Socket NULL");
 		}
 	}
-	//Methode en cours de developpement
+
+	// Methode en cours de developpement
 	public void reception() {
-		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
 				try {
-					int readBytes = 0;
-					// Réception d'une chaine
-					byte[] buffer = new byte[1024];
-			        readBytes = socket.getInputStream().read(buffer, 0, 1024);
-				
+					Log.d(LOG_TAG, "debut : readLine");
 					String s = recepteur.readLine();
-					Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+					Log.d(LOG_TAG, "fin : readLine");
+					setRecu(s);
+					Log.d(LOG_TAG, getRecu());
+					if(getRecu().compareTo("OC") == 0) {
+						runOnUiThread(new Runnable() {
+					        public void run() {
+					          messageRecu.setText("Occupé");
+					        }
+					      });
+					}
+					if(getRecu().compareTo("OK") == 0) {
+						runOnUiThread(new Runnable() {
+					        public void run() {
+					          messageRecu.setText("Libre");
+					        }
+					      });
+					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}
+		}).start();
+		
 	}
-	
-	
+
 	/**
 	 * Ferme le socket s'il a était créé
 	 */
@@ -339,60 +281,111 @@ public class MyActivity extends Activity implements SeekBar.OnSeekBarChangeListe
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Affiche le dialog
-	 * @param tag Le tag du dialog a affiché
+	 * 
+	 * @param tag
+	 *            Le tag du dialog a affiché
 	 */
 	public void afficherDialogue(String tag) {
-		Log.d(LOG_TAG, "showDialog : " + tag);
+		//Log.d(LOG_TAG, "showDialog : " + tag);
 		mDialog.show(getFragmentManager(), tag);
 	}
-	
+
 	/**
-	 * Méthode de callback exécuter par le click sur le bouton Annulé du dialogue
+	 * Méthode de callback exécuter par le click sur le bouton Annulé du
+	 * dialogue
 	 */
 	public void doNegativeClick() {
-		Log.d(LOG_TAG, "doNegativeClick");
+		//Log.d(LOG_TAG, "doNegativeClick");
 		startActivity(new Intent(this, Accueil.class));
 	}
+
+	
+	public boolean isIp(String ip)
+	{
+		String[] tabIp = ip.split("\\.");
+		boolean isIp = Boolean.TRUE;
+		try {
+			if (tabIp.length!=4) return false;
+			int digitIp =0; 
+			for (int i=0;i<tabIp.length;i++)
+			{
+				digitIp = Integer.parseInt(tabIp[i]);
+				if (digitIp<0 || digitIp>255)
+					isIp = Boolean.FALSE;
+			}
+		} catch (Exception e) {
+			isIp = Boolean.FALSE;
+		}
+		return isIp;
+	}
 	
 	/**
-	 * Méthode de callback exécuter par le click sur le bouton ok du dialogue de connexion réseau
-	 * @param ip Adresse IP du destinataire
-	 * @param port Numéro de port du serveur
+	 * Mode automatique
+	 * @param view
 	 */
-	public void doPositiveClick(String ip, int port) {
-		Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
-		this.ip = ip;
-		this.port = port;
-		handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
+	public void lancerCapture(View view) {
+		if (capture != true) {
+
+			// On ajoute un message à notre progress dialog
+			progressDialog.setMessage("Execution en cours");
+			// On affiche notre message
+			progressDialog.show();
+
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					envoyer("R");
+					//reception();
+					try {
+						Thread.sleep(3000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					for (int i = 0; i < al.size(); i++) {
+						Pair<String, Long> p = al.get(i);
+						//Log.d(LOG_TAG, p.first + ":" + p.second);
+						try {
+							envoyer(p.first);
+							Thread.sleep(p.second);
+							envoyer("S:B");
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					// A la fin du traitement, on fait disparaitre notre message
+					progressDialog.dismiss();
+				}
+
+			}).start();
+		}
+		else {
+			Toast.makeText(this, "Arreter la capture", Toast.LENGTH_SHORT).show();	
+		}
 	}
 	
-	/**
-	 * SeekBar événement : changement de vitesse
-	 */
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress,
-			boolean fromUser) {
-		Log.d(LOG_TAG, "onProgressChanged SeekBar");
-		if (seekBar.getTag().toString().compareTo("VITESSE") == 0) {
-			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_VITESSE);
-		}
-		if (seekBar.getTag().toString().compareTo("COUPLE") == 0) {
-			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_COUPLE);
-		}
-	}
+	public void onToggleClicked(View view) {
+		// Is the toggle on?
+		boolean on = ((ToggleButton) view).isChecked();
 
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
-		Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
+		if (on) {
+			al.clear();
+			envoyer("R");
+			// Enable vibrate
+			capture = true;
+			lancerCapture.setEnabled(false);
+			Toast.makeText(this, "Capture", Toast.LENGTH_SHORT).show();
+		} else {
+			// Disable vibrate
+			lancerCapture.setEnabled(true);
+			capture = false;
+		}
 	}
 	
 }

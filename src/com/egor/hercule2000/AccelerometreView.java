@@ -153,11 +153,11 @@ public class AccelerometreView extends View {
 		float zToDisp = (activity.getaZ() * maxRayon) / activity.getPorteeMax();
 		activity.calculeRequete(xToDisp, yToDisp, zToDisp, xCenter / 4, yCenter / 4);
 
-		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 15, paint);
+		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 11, paint);
 		paint.setARGB(255, 255, 255, 255);
-		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 13, paint);
+		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 9, paint);
 		paint.setARGB(130, 255, 0, 0);
-		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 13, paint);
+		canvas.drawCircle(xCenter - xToDisp, yToDisp + yCenter, 9, paint);
 	}
 
 }

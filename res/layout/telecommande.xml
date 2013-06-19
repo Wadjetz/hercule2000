@@ -265,6 +265,16 @@
             android:layout_alignParentTop="true"
             android:onClick="lancerCapture"
             android:text="@string/lancer_capture" />
+
+        <TextView
+            android:id="@+id/messageRecu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/capturer"
+            android:layout_alignBottom="@+id/capturer"
+            android:layout_centerHorizontal="true"
+            android:text="" />
+
     </RelativeLayout>
 
 </LinearLayout>

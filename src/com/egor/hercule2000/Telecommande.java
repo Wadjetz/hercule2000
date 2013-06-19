@@ -1,9 +1,15 @@
 package com.egor.hercule2000;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -14,10 +20,8 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
-public class Telecommande extends MyActivity {
+public class Telecommande extends MyActivity implements SeekBar.OnSeekBarChangeListener  {
 	
 	/* ----------------------- METHODES ---------------------- */
 	/**
@@ -28,12 +32,15 @@ public class Telecommande extends MyActivity {
 		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
 		vitesseSeekBar.setOnSeekBarChangeListener(this);
 		vitesseSeekBar.setProgress(vitesse);
-
+		messageRecu = (TextView)findViewById(R.id.messageRecu);
 		coupleSeekBar = (SeekBar) findViewById(R.id.coupleSeekBar);
 		coupleTextView = (TextView) findViewById(R.id.coupleTextView);
 		coupleSeekBar.setOnSeekBarChangeListener(this);
 		coupleSeekBar.setProgress(400);
-
+		
+		lancerCapture = (Button)findViewById(R.id.lancerCapture);
+		lancerCapture.setEnabled(false);
+		
 		((Button) findViewById(R.id.BaseNegatif))
 				.setOnTouchListener(mouvementNegatif);
 		((Button) findViewById(R.id.BasePositif))
@@ -59,7 +66,108 @@ public class Telecommande extends MyActivity {
 		((Button) findViewById(R.id.RelacherPince))
 				.setOnTouchListener(relacherPince);
 	}
+	
+	
 
+	/**
+	 * Le Handler (Thread spécialisé) charger de modifier le IHM
+	 */
+	protected Handler handler = new Handler() {
+		@Override
+		public void handleMessage(android.os.Message msg) {
+			switch (msg.what) {
+			case HANDLER_CONNEXION_SOCKET:
+				//Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
+				// progressDialog = null;
+				// On ajoute un message à notre progress dialog
+				progressDialog.setMessage("Connexion en cours");
+				// On affiche notre message
+				progressDialog.show();
+				// Empeche l'interuption du dialog
+				progressDialog.setCanceledOnTouchOutside(false);
+				connexion.start();
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
+				vitesse = vitesseSeekBar.getProgress() + 1;
+				vitesseTextView.setText("Vitesse : " + vitesse);
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
+				couple = coupleSeekBar.getProgress() + 1;
+				coupleTextView.setText("Couple : " + couple);
+				break;
+			}
+		};
+	};
+	
+	/**
+	 * SeekBar événement : changement de vitesse
+	 */
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		//Log.d(LOG_TAG, "onProgressChanged SeekBar");
+		if (seekBar.getTag().toString().compareTo("VITESSE") == 0) {
+			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_VITESSE);
+		}
+		if (seekBar.getTag().toString().compareTo("COUPLE") == 0) {
+			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_COUPLE);
+		}
+	}
+	
+	/**
+	 * Méthode de callback exécuter par le click sur le bouton ok du dialogue de
+	 * connexion réseau
+	 * 
+	 * @param ip
+	 *            Adresse IP du destinataire
+	 * @param port
+	 *            Numéro de port du serveur
+	 */
+	public void doPositiveClick(String ip, int port) {
+		//Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
+		this.ip = ip;
+		this.port = port;
+		if(isIp(ip)) {
+			handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
+		}
+		else {
+			//Intent intent = new Intent();
+			//Log.d(LOG_TAG, "IP Invalide");
+			MDialog md = new MDialog();
+			md.show(getFragmentManager(), MDialog.DIALOG_IP_INVALIDE);
+		}
+	}
+	
+	/**
+	 * Thread de connexion reseaux
+	 */
+	protected Thread connexion = new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+			Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+			socketAddress = new InetSocketAddress(ip, port);
+			try {
+				socket.connect(socketAddress, 10000);
+				if (socket.isConnected()) {
+					emetteur = new PrintWriter(socket.getOutputStream(), true);
+					recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					envoyer("D:1234");
+					reception();
+				}
+			} catch (IOException e) {
+				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+				progressDialog.dismiss();
+				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+			}
+			progressDialog.dismiss();
+			if(socket.isConnected()){
+				//reception();
+			}
+		}
+	});
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,13 +178,14 @@ public class Telecommande extends MyActivity {
 
 		this.ihm();
 		// On affiche le dialog de connexion
-		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_TEL);
 	}
 
 	@Override
 	protected void onDestroy() {
 		// On ferme le socket
-		close();
+		Log.d(LOG_TAG, "onDestroy Telecommande");
+		super.close();
 		super.onDestroy();
 	}
 
@@ -100,7 +209,8 @@ public class Telecommande extends MyActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			startActivity(new Intent(this, Accueil.class));
+			//NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.connexion:
 			startActivity(new Intent(this, Telecommande.class));
@@ -126,6 +236,7 @@ public class Telecommande extends MyActivity {
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1)+":-:" + vitesse;
 				envoyer(requete);
+//				reception();
 
 			}
 
@@ -136,8 +247,9 @@ public class Telecommande extends MyActivity {
 				if (capture) {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
-				Log.d(LOG_TAG, "delais : " + delais);
+				//Log.d(LOG_TAG, "delais : " + delais);
 				envoyer("S:" + v.getTag().toString().substring(0, 1));
+//				reception();
 			}
 			return true;
 		}
@@ -157,6 +269,7 @@ public class Telecommande extends MyActivity {
 				t0 = System.currentTimeMillis();
 				requete = "M:" + v.getTag().toString().substring(0, 1) + ":+:" + vitesse;
 				envoyer(requete);
+//				reception();
 
 			}
 
@@ -168,68 +281,20 @@ public class Telecommande extends MyActivity {
 					al.add(new Pair<String, Long>(requete, delais));
 				}
 				envoyer("S:" + v.getTag().toString().substring(0, 1));
+//				reception();
 			}
 			return true;
 		}
 	};
-
-	public void onToggleClicked(View view) {
-		// Is the toggle on?
-		boolean on = ((ToggleButton) view).isChecked();
-
-		if (on) {
-			// Enable vibrate
-			capture = true;
-			Toast.makeText(this, "Capture", Toast.LENGTH_SHORT).show();
-		} else {
-			// Disable vibrate
-			capture = false;
-		}
+	
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		//Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
 	}
-	/**
-	 * Mode automatique
-	 * @param view
-	 */
-	public void lancerCapture(View view) {
-		if (capture != true) {
 
-			// On ajoute un message à notre progress dialog
-			progressDialog.setMessage("Execution en cours");
-			// On affiche notre message
-			progressDialog.show();
-
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					envoyer("R");
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					for (int i = 0; i < al.size(); i++) {
-						Pair<String, Long> p = al.get(i);
-						Log.d(LOG_TAG, p.first + ":" + p.second);
-						try {
-							envoyer(p.first);
-							Thread.sleep(p.second);
-							envoyer("S");
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					// A la fin du traitement, on fait disparaitre notre message
-					progressDialog.dismiss();
-				}
-
-			}).start();
-		}
-		else {
-			Toast.makeText(this, "Arreter la capture", Toast.LENGTH_SHORT).show();	
-		}
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		//Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
 	}
+
 }

@@ -7,9 +7,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 public class Accueil extends Activity {
 	public static final String LOG_TAG = "Egor";
@@ -17,17 +16,18 @@ public class Accueil extends Activity {
 	 * L'objet qui gère le wi-fi du téléphone
 	 */
 	private WifiManager wifiManager = null;
-	private ListView listeVue = null;
 	/**
 	 * Les dialogs
 	 */
 	private DialogFragment mDialog = new MDialog();
+	private Button accueil_accelerometre = null;
+	private Button accueil_telecommande = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.accueil);
-		
+
 		// On vérifie si le wi-fi est activé
 		wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 		if (wifiManager != null) {
@@ -38,44 +38,39 @@ public class Accueil extends Activity {
 			}
 		}
 
-		// On récupère la ListView
-		listeVue = (ListView) findViewById(R.id.listView_acceuil_commandes);
-
-		String[] listCommandes = new String[] { "Télécommande", "Accelerometre" };
-
-		ArrayAdapter<String> adaptateur = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_activated_1, listCommandes);
-
-		listeVue.setAdapter(adaptateur);
-
-		listeVue.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		accueil_accelerometre = (Button) findViewById(R.id.accueil_accelerometre);
+		accueil_accelerometre.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-				switch (position) {
-				case 0:
-					// Clique sur Télécommande
-					startActivity(new Intent(Accueil.this, Telecommande.class));
-					break;
-				case 1:
-					// Clique sur Accelerometre
-					startActivity(new Intent(Accueil.this, Accelerometre.class));
-					break;
-				}
+			public void onClick(View v) {
+				// Clique sur Accelerometre
+				startActivity(new Intent(Accueil.this, Accelerometre.class));
 			}
+		});
 
+		accueil_telecommande = (Button) findViewById(R.id.accueil_telecommande);
+		accueil_telecommande.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Clique sur Télécommande
+				startActivity(new Intent(Accueil.this, Telecommande.class));
+			}
 		});
 	}
+
 	/**
 	 * Active le wifi
 	 */
 	public void startWifi() {
 		wifiManager.setWifiEnabled(true);
 	}
+
 	/**
 	 * Affiche le dialogue
-	 * @param tag le dialogue a afficher
+	 * 
+	 * @param tag
+	 *            le dialogue a afficher
 	 */
 	public void showDialoge(String tag) {
 		Log.d(LOG_TAG, "showDialog : " + tag);

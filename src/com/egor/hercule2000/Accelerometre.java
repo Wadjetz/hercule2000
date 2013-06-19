@@ -1,5 +1,11 @@
 package com.egor.hercule2000;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -8,8 +14,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
+import android.os.Handler;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class Accelerometre extends MyActivity implements SensorEventListener {
+public class Accelerometre extends MyActivity implements SensorEventListener, SeekBar.OnSeekBarChangeListener  {
 
 	/**
 	 * Les valeurs de l'accéléromètre
@@ -53,11 +60,6 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 	 * Portée maximale du capteur
 	 */
 	private float porteeMax;
-
-	/**
-	 * IHM : affiche les valeurs de l'accéléromètre
-	 */
-	private TextView xTextView = null, yTextView = null, zTextView = null;
 
 	/**
 	 * Display récupère l'orientation de l'appareil
@@ -92,6 +94,11 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisVerticale = false;
+//				long current = System.currentTimeMillis();
+//				delais = current - t0;
+//				if (capture) {
+//					al.add(new Pair<String, Long>(requete, delais));
+//				}
 				envoyer("S");
 			}
 			return true;
@@ -115,24 +122,130 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 				// v.setFocusable(false);
 				v.setBackgroundColor(getResources().getColor(R.color.MyButton));
 				appuisHorisontal = false;
+//				long current = System.currentTimeMillis();
+//				delais = current - t0;
+//				if (capture) {
+//					al.add(new Pair<String, Long>(requete, delais));
+//				}
 				envoyer("S");
 			}
 			return true;
 		}
 	};
+	
+	
+	/**
+	 * Thread de connexion reseaux
+	 */
+	protected Thread connexion = new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+			Log.d(LOG_TAG, "threadConnexionReseaux RUN");
+			socketAddress = new InetSocketAddress(ip, port);
+			try {
+				socket.connect(socketAddress, 10000);
+				if (socket.isConnected()) {
+					emetteur = new PrintWriter(socket.getOutputStream(), true);
+					recepteur = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					envoyer("D:1234");
+					//reception();
+				}
+			} catch (IOException e) {
+				Log.d(LOG_TAG, "Socket Erreur : " + e.getMessage());
+				progressDialog.dismiss();
+				afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ERREUR);
+			}
+			progressDialog.dismiss();
+			if(socket.isConnected()){
+				reception();
+			}
+		}
+	});
+	
+
+	/**
+	 * Le Handler (Thread spécialisé) charger de modifier le IHM
+	 */
+	protected Handler handler = new Handler() {
+		@Override
+		public void handleMessage(android.os.Message msg) {
+			switch (msg.what) {
+			case HANDLER_CONNEXION_SOCKET:
+				//Log.d(LOG_TAG, "HANDLER_CONNEXION_SOCKET");
+				// progressDialog = null;
+				// On ajoute un message à notre progress dialog
+				progressDialog.setMessage("Connexion en cours");
+				// On affiche notre message
+				progressDialog.show();
+				// Empeche l'interuption du dialog
+				progressDialog.setCanceledOnTouchOutside(false);
+				connexion.start();
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_VITESSE:
+				vitesse = vitesseSeekBar.getProgress() + 1;
+				vitesseTextView.setText("Vitesse : " + vitesse);
+				break;
+			case HANDLER_SEEK_BAR_CHANGED_COUPLE:
+				couple = coupleSeekBar.getProgress() + 1;
+				coupleTextView.setText("Couple : " + couple);
+				break;
+			}
+		};
+	};
+	
+	/**
+	 * SeekBar événement : changement de vitesse
+	 */
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		//Log.d(LOG_TAG, "onProgressChanged SeekBar");
+		if (seekBar.getTag().toString().compareTo("VITESSE") == 0) {
+			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_VITESSE);
+		}
+		if (seekBar.getTag().toString().compareTo("COUPLE") == 0) {
+			handler.sendEmptyMessage(HANDLER_SEEK_BAR_CHANGED_COUPLE);
+		}
+	}
+	
+	/**
+	 * Méthode de callback exécuter par le click sur le bouton ok du dialogue de
+	 * connexion réseau
+	 * 
+	 * @param ip
+	 *            Adresse IP du destinataire
+	 * @param port
+	 *            Numéro de port du serveur
+	 */
+	public void doPositiveClick(String ip, int port) {
+		//Log.d(LOG_TAG, "doPositiveClick : " + ip + ":" + port);
+		this.ip = ip;
+		this.port = port;
+		if(isIp(ip)) {
+			handler.sendEmptyMessage(HANDLER_CONNEXION_SOCKET);
+		}
+		else {
+			//Intent intent = new Intent();
+			//Log.d(LOG_TAG, "IP Invalide");
+			MDialog md = new MDialog();
+			md.show(getFragmentManager(), MDialog.DIALOG_IP_INVALIDE);
+		}
+	}
+	
+	
+	
 	/**
 	 * Initialisation de l'IHM
 	 */
 	private void ihm() {
-		xTextView = (TextView) findViewById(R.id.xTextView);
-		yTextView = (TextView) findViewById(R.id.yTextView);
-		zTextView = (TextView) findViewById(R.id.zTextView);
-
+		messageRecu = (TextView)findViewById(R.id.messageRecu);
 		vitesseTextView = (TextView) findViewById(R.id.txv_vitesse_commande_manuelle);
 		vitesseSeekBar = (SeekBar) findViewById(R.id.seekBarVitesse);
 		vitesseSeekBar.setOnSeekBarChangeListener(this);
 		vitesseSeekBar.setProgress(vitesse);
-
+//		lancerCapture = (Button)findViewById(R.id.lancerCapture);
+//		lancerCapture.setEnabled(false);
 		coupleSeekBar = (SeekBar) findViewById(R.id.coupleSeekBar);
 		coupleTextView = (TextView) findViewById(R.id.coupleTextView);
 		coupleSeekBar.setOnSeekBarChangeListener(this);
@@ -192,7 +305,7 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 		// On affiche le dialog de connexion
 		progressDialog = new ProgressDialog(this);
-		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET);
+		afficherDialogue(MDialog.DIALOG_CONNEXION_SOCKET_ACC);
 	}
 
 	@Override
@@ -216,9 +329,10 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 	@Override
 	protected void onDestroy() {
+		Log.d(LOG_TAG, "onDestroy Accelerometre");
 		// on désactive le capteur
 		sensorManager.unregisterListener(this, accelerometre);
-		close();
+		super.close();
 		super.onDestroy();
 	}
 
@@ -280,8 +394,13 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// fin gauche
 			if ((y < declencheurY)) {
 				if (VerticalDroiteFin == false) {
-					Log.d(LOG_TAG, "STOP:Sud");
-					envoyer("S:Sud");
+					//Log.d(LOG_TAG, "STOP:Sud");
+					long current = System.currentTimeMillis();
+					delais = current - t0;
+					if (capture) {
+						al.add(new Pair<String, Long>(requete, delais));
+					}
+					envoyer("S:" + tag);
 					VerticalDroiteFin = true;
 				}
 				VerticalDroite = false;
@@ -289,8 +408,10 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut gauche
 			if (y > declencheurY) {
 				if (VerticalDroite == false) {
-					Log.d(LOG_TAG, "Sud");
-					envoyer("M:" + tag + ":-:" + 25);
+					//Log.d(LOG_TAG, "Sud");
+					t0 = System.currentTimeMillis();
+					requete = "M:" + tag + ":-:" + vitesse;
+					envoyer(requete);
 					VerticalDroite = true;
 				}
 				VerticalDroiteFin = false;
@@ -299,8 +420,10 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut droite
 			if (y < -declencheurY) {
 				if (VerticalGauche == false) {
-					Log.d(LOG_TAG, "Nord");
-					envoyer("M:" + tag + ":+:" + 25);
+					//Log.d(LOG_TAG, "Nord");
+					t0 = System.currentTimeMillis();
+					requete = "M:" + tag + ":+:" + vitesse;
+					envoyer(requete);
 					VerticalGauche = true;
 				}
 				VerticalGaucheFin = false;
@@ -308,8 +431,13 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 			if ((y > -declencheurY)) {
 				if (VerticalGaucheFin == false) {
-					Log.d(LOG_TAG, "STOP:Nord");
-					envoyer("S:Nord");
+					//Log.d(LOG_TAG, "STOP:Nord");
+					long current = System.currentTimeMillis();
+					delais = current - t0;
+					if (capture) {
+						al.add(new Pair<String, Long>(requete, delais));
+					}
+					envoyer("S:" + tag);
 					VerticalGaucheFin = true;
 				}
 				VerticalGauche = false;
@@ -319,7 +447,12 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// fin gauche
 			if ((x < declencheurX)) {
 				if (HorisontalDroiteFin == false) {
-					envoyer("S:Ouest");
+					long current = System.currentTimeMillis();
+					delais = current - t0;
+					if (capture) {
+						al.add(new Pair<String, Long>(requete, delais));
+					}
+					envoyer("S:" + tag);
 					HorisontalDroiteFin = true;
 				}
 				HorisontalDroite = false;
@@ -327,8 +460,9 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut gauche
 			if (x > declencheurX) {
 				if (HorisontalDroite == false) {
-					;
-					envoyer("M:" + tag + ":-:" + 25);
+					t0 = System.currentTimeMillis();
+					requete = "M:" + tag + ":-:" + vitesse;
+					envoyer(requete);
 					HorisontalDroite = true;
 				}
 				HorisontalDroiteFin = false;
@@ -337,7 +471,9 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 			// debut droite
 			if (x < -declencheurX) {
 				if (HorisontalGauche == false) {
-					envoyer("M:" + tag + ":+:" + 25);
+					t0 = System.currentTimeMillis();
+					requete = "M:" + tag + ":+:" + vitesse;
+					envoyer(requete);
 					HorisontalGauche = true;
 				}
 				HorisontalGaucheFin = false;
@@ -345,16 +481,17 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 
 			if ((x > -declencheurX)) {
 				if (HorisontalGaucheFin == false) {
-					envoyer("S:Est");
+					long current = System.currentTimeMillis();
+					delais = current - t0;
+					if (capture) {
+						al.add(new Pair<String, Long>(requete, delais));
+					}
+					envoyer("S:" + tag);
 					HorisontalGaucheFin = true;
 				}
 				HorisontalGauche = false;
 			}
 		}
-
-		xTextView.setText("X : " + x);
-		yTextView.setText("Y : " + y);
-		zTextView.setText("Z : " + z);
 	}
 
 	/**
@@ -377,7 +514,8 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			startActivity(new Intent(this, Accueil.class));
+			//NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.connexion:
 			startActivity(new Intent(this, Accelerometre.class));
@@ -404,4 +542,14 @@ public class Accelerometre extends MyActivity implements SensorEventListener {
 		return porteeMax;
 	}
 	
+	
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		//Log.d(LOG_TAG, "onStartTrackingTouch SeekBar");
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		//Log.d(LOG_TAG, "onStopTrackingTouch SeekBar");
+	}
 }
